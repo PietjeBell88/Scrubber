@@ -71,6 +71,7 @@ enum EmitterType
 enum GlobalBC
 {
     GBC_PRESSURE = 1,
+    GBC_BULK_VEL
 };
 
 enum WallBC

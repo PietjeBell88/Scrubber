@@ -167,6 +167,7 @@ void show_help()
             "      --n <double> (=800)                     Amount of \"volumes\" in the channel.\n"
             "      --globbc <enum> (=1)                    Global boundary condition:\n"
             "                                                1: Pressure gradient (usually negative).\n"
+            "                                                2: Bulk velocity (m/s).\n"
             "      --globbv <double> (=-1)                 Global boundary value.\n"
             "                                              ! Meaning dependent on --globbv. Standard SI-units. !\n"
             "      --wallbc <enum> (=1)                    Boundary condition at the wall:\n"

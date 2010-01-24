@@ -57,6 +57,12 @@ protected:
     static const double lambda;
     static const double kappa;
 
+    /**
+     * Get the velocity profile by calling one of the loop methods.
+     * @param u  Profile which will be filled.
+     * @return   Velocity profile.
+     */
+    ScalarField CPModel::velocityProfile( ScalarField u );
 
     /**
      * Use the simple model to get a steady solution.
@@ -122,7 +128,8 @@ public:
 
     /**
      * Initialize a ScalarField with values.
-     * Generates the velocity profile in the channel by looping until steady.
+     * Generates the velocity profile in the channel by looping until steady, and
+     * makes sure the global boundary condition is satisfied.
      */
     ScalarField init( ScalarField u );
 };

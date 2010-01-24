@@ -50,6 +50,24 @@ CPModel::~CPModel() {}
 
 
 // Private methods
+ScalarField CPModel::velocityProfile( ScalarField u )
+{
+    // FIXME: Check for invalid loop_model shouldn't be done here, but when parsing commandline arguments.
+    // Calculate the velocity profile based on various loop models.
+    switch ( loop_model ) {
+        case LM_SIMPLE:
+            u = loopSimple( u );
+            break;
+        case LM_PRANDTL:
+            u = loopPrandtl( u );
+            break;
+        default:
+            printf( "Unkown loop_model [%d], stopping...\n", loop_model );
+            break;
+    }
+    return u;
+}
+
 ScalarField CPModel::loopSimple( ScalarField u )
 {
     ScalarField unew( u.shape() );
@@ -168,21 +186,36 @@ ScalarField CPModel::init( ScalarField u )
 
     // Pressure gradient definition
     if ( globbc == GBC_PRESSURE )
+    {
         pg = globbv;
-
-    // FIXME: Check for invalid loop_model shouldn't be done here, but when parsing commandline arguments.
-    // Calculate the velocity profile based on various loop models.
-    switch ( loop_model ) {
-        case LM_SIMPLE:
-            u = loopSimple( u );
-            break;
-        case LM_PRANDTL:
-            u = loopPrandtl( u );
-            break;
-        default:
-            printf( "Unkown loop_model [%d], stopping...\n", loop_model );
-            break;
+        u = velocityProfile( u );
     }
 
+    else if ( globbc == GBC_BULK_VEL )
+    {
+        // Guess a pressure gradient
+        pg = globbv / -1.0;
+
+        double error = 1000;
+
+        double bulk_vel = 0;   // Calculated bulk velocity
+
+        // Loop until the desired bulk velocity is reached.
+        while ( error > errork )
+        {
+            u = velocityProfile( u );
+
+            bulk_vel = sum( u ) / n;
+
+            error = abs( (bulk_vel - globbv) / globbv );
+
+            // Guess a new pressure gradient, and scale the elements of u
+            pg = pg * globbv / bulk_vel;
+            u = u * globbv / bulk_vel;
+
+            // Set the ghost points to the appropriate values
+            setGhost( &u );
+        }
+    }
     return u;
 }
