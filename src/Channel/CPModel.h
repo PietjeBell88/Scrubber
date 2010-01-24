@@ -60,15 +60,15 @@ protected:
 
     /**
      * Use the simple model to get a steady solution.
-     * @param u  Profile which will be (re)calculated.
-     * @return   Recalculated profile.
+     * @param u  Profile which will be calculated.
+     * @return   Calculated profile.
      */
     ScalarField loopSimple( ScalarField u );
 
     /**
      * Use the prandtl mixing length model to get a steady solution.
-     * @param u  Profile which will be (re)calculated.
-     * @return   Recalculated profile.
+     * @param u  Profile which will be calculated.
+     * @return   Calculated profile.
      */
     ScalarField loopPrandtl( ScalarField u );
 

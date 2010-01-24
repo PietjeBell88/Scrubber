@@ -170,14 +170,11 @@ ScalarField CPModel::init( ScalarField u )
     if ( globbc == GBC_PRESSURE )
         pg = globbv;
 
-    // Get the velocity profile based on the simple model.
-    u = loopSimple( u );
-
     // FIXME: Check for invalid loop_model shouldn't be done here, but when parsing commandline arguments.
-    // Recalculate the velocity profile based on another model.
+    // Calculate the velocity profile based on various loop models.
     switch ( loop_model ) {
         case LM_SIMPLE:
-            // Simple model, already done
+            u = loopSimple( u );
             break;
         case LM_PRANDTL:
             u = loopPrandtl( u );
