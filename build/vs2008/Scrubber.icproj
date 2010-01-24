@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Intel C++ Project"
+	Version="11.1"
+	Name="Scrubber"
+	ProjectGUID="{ED04EEF8-DA35-43D7-AE2B-5FA7BD91E055}"
+	VCNestedProjectGUID="{D4423193-7F06-45F2-BD8A-AEFF115699D4}"
+	VCNestedProjectFileName="Scrubber.vcproj">
+	<Configurations>
+		<Configuration
+			Name="Release|Win32">
+			<Tool
+				Name="CppCmplrTool"
+				GlobalOptimizations="true"
+				UseProcessorExtensions="1"
+				Parallelization="false"
+				C99Support="false"
+				ProfileGuidedOptimization="0"/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64">
+			<Tool
+				Name="CppCmplrTool"
+				GlobalOptimizations="true"
+				UseProcessorExtensions="6"
+				Parallelization="false"
+				C99Support="true"
+				ProfileGuidedOptimization="0"/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseIntel|Win32">
+			<Tool
+				Name="CppCmplrTool"
+				Optimization="1000"
+				GlobalOptimizations="true"
+				EnableEnhancedInstructionSet="1000"
+				GenerateAlternateCodePaths="0"
+				UseProcessorExtensions="6"
+				Parallelization="true"
+				C99Support="true"/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseIntel|x64">
+			<Tool
+				Name="CppCmplrTool"
+				Optimization="1000"
+				GlobalOptimizations="true"
+				EnableEnhancedInstructionSet="1000"
+				GenerateAlternateCodePaths="0"
+				UseProcessorExtensions="6"
+				Parallelization="true"
+				C99Support="true"/>
+		</Configuration>
+	</Configurations>
+	<Files/>
+</VisualStudioProject>
