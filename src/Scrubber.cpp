@@ -119,7 +119,7 @@ int main( int argc, char* argv[] )
 
     while ( time <= param.duration )
     {
-        writeProgress( 100 * time / param.duration );
+        writeProgress( (int) (100 * time / param.duration) );
 
         // Move the particles
         mover->doMove( &particles );
