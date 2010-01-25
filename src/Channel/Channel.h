@@ -35,18 +35,26 @@ protected:
     int n;
     double dx;
 
+    TurbModel turb_model;
+
     ScalarField u;
 
     // For filling the velocity profile array.
     CPModel *cpmodel;
 
     /**
-     * Interpolates velocity field at a position.
-     * @param v    Velocity field of the channel.
+     * Interpolates velocity component u at a certain position.
      * @param pos  Position of the particle.
-     * @return     Velocity at the position of the particle.
+     * @return     Velocity u at the position of the particle.
      */
-    Vector2d interpolate2d( const Vector2d &pos );
+    double interpolate2d( const Vector2d &pos );
+
+    /**
+     * Gets the derivative of the velocity componenent u in the y direction at a certain position.
+     * @param pos  Position of the particle.
+     * @return     Derivative of the velocity compenent u in the y direction.
+     */
+    double dudy( const Vector2d &pos );
 
 public:
     /**
@@ -74,11 +82,13 @@ public:
     PosBox outsideBox( const Vector2d &pos );
 
     /**
-     * Get the velocity in the channel at a certain position.
-     * @param pos  Position to get the velocity at.
-     * @return     The velocity of the continuous phase at the position pos.
+     * Get a surrouding fluid velocity of a particle in the channel based on the Discrete Eddy Model.
+     * @param pos          Position of the particle.
+     * @param vel          Velocity of the particle.
+     * @param *v_vel       Calculated velocity of the surrounding fluid.
+     * @param *count_down  Calculated count_down.
      */
-    Vector2d velocityAt( const Vector2d &pos );
+    void velocityAt( const Vector2d &pos, const Vector2d &vel, Vector2d *v_vel, double *count_down );
 
     /**
      * Get the velocity field.

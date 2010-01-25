@@ -48,6 +48,12 @@ enum LoopModel
     LM_PRANDTL
 };
 
+enum TurbModel
+{
+    TURB_NONE,
+    TURB_DISCRETE_EDDY
+};
+
 enum OutputInfo
 {
     OUTPUT_NOTHING,
@@ -115,6 +121,7 @@ struct ScrubberParam
 
         int bounce_model; /// <enum> Sticky walls etc.
         int loop_model;   /// <enum> Model used to get fluid velocity profile in the channel.
+        int turb_model;   /// <enum> Indicates what model to use for generation of eddies/pertubations.
     } channel;
 
     // Fluid properties

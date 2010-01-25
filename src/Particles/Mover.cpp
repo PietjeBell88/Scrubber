@@ -63,8 +63,21 @@ void Mover::doMove( ParticleArray *particles )
         const Vector2d & p_pos = particle.getPos();
         const Vector2d & p_vel = particle.getVel();
 
-        // Get the continuous phase velocity and accelertion at the position of the particle.
-        const Vector2d & v_vel = channel->velocityAt( p_pos );
+        // Get the velocity of the fluid surrounding the particle
+        Vector2d v_vel = particle.getSurroundingVel();
+
+        // Get countdown
+        double count_down = particle.getCountDown();
+        count_down = count_down - dt;
+
+        if ( count_down <= 0 )
+        {
+            // Get a new surrounding velocity
+            channel->velocityAt( p_pos, p_vel, &v_vel, &count_down );
+            particle.setSurroundingVel( v_vel );
+        }
+
+        particle.setCountDown( count_down );
 
         // Particle equation of motion.
         const Vector2d dv = (1 / tau_a * (v_vel - p_vel) + (beta - 1) / (beta + 0.5) * gravity ) * dt;

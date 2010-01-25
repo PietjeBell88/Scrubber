@@ -16,6 +16,8 @@
 // Headers
 #include "Channel.h"
 
+#include "MTRand.h"
+
 #include "CPModel.h"
 
 
@@ -27,6 +29,8 @@ Channel::Channel( const ScrubberParam &param )
 
     this->n = param.channel.n;
     this->dx = param.channel.dx;
+
+    this->turb_model = (TurbModel) param.channel.turb_model;
 
     this->cpmodel = new CPModel( param );
 
@@ -41,7 +45,7 @@ Channel::~Channel() {}
 
 
 // Private methods
-Vector2d Channel::interpolate2d( const Vector2d &pos )
+double Channel::interpolate2d( const Vector2d &pos )
 {
     // Position should be located in the channel
     assert( abs( pos(0) ) <= radius );
@@ -58,7 +62,16 @@ Vector2d Channel::interpolate2d( const Vector2d &pos )
     double x = fmod(pos(0) + radius + 0.5 * dx, dx) / dx;
 
     //Do a weighted addition
-    return Vector2d( 0, u(i) * (1 - x) + u(i + 1) * x );
+    return u(i) * (1 - x) + u(i + 1) * x;
+}
+
+double Channel::dudy( const Vector2d &pos )
+{
+    // Start by finding the lower index values of the box surrounding the particle.
+    int i = static_cast<int> (floor( (pos(0) + radius + 0.5 * dx) / dx ));
+
+    //Do a weighted addition
+    return (u(i+1) - u(i))/dx;
 }
 
 
@@ -87,9 +100,38 @@ PosBox Channel::outsideBox( const Vector2d &pos )
         return P_INSIDE;
 }
 
-Vector2d Channel::velocityAt( const Vector2d &pos )
+void Channel::velocityAt( const Vector2d &pos, const Vector2d &vel, Vector2d *v_vel, double *count_down )
 {
-    return interpolate2d( pos );
+    Vector2d mean_velocity = Vector2d( 0, interpolate2d( pos ) );
+
+    if ( turb_model == TURB_NONE )
+        *v_vel = mean_velocity;
+
+    else if ( turb_model == TURB_DISCRETE_EDDY )
+    {
+        MTRand myran;
+
+        // Discrete-eddy model
+        // readability
+        const double C_T = 0.3;
+
+        const double u_acc = cpmodel->prandtlLength( pos(0) ) * abs( dudy( pos ) );
+        const double sigma = abs( u_acc );
+
+        const Vector2d new_velocity( myran.randNorm( mean_velocity(0), sigma ), myran.randNorm( mean_velocity(1), sigma ) );
+
+        const double T_eddy = C_T / abs( dudy( pos ) );
+        const double L_eddy = T_eddy * sigma;
+        // FIXME: Check if norm is always positive.
+        const double T_res = L_eddy / blitz::norm( vel - new_velocity );
+
+        *count_down = min( T_res, T_eddy );
+        *v_vel = new_velocity;
+    }
+
+    // FIXME: Checking should be done in parsing of commandline arguments.
+    else
+        printf( "Unkown turb_model [%d], stopping...\n", turb_model );
 }
 
 const ScalarField &Channel::getVelocityField() const

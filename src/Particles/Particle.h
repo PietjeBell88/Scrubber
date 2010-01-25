@@ -27,6 +27,10 @@ private:
     Vector2d pos;
     Vector2d vel;
 
+    // Turbulence model parameters
+    Vector2d v_vel;
+    double count_down;
+
 public:
     /**
      * Default constructor (only needed for creation of ParticleArray).
@@ -63,4 +67,28 @@ public:
      * @param vel  New velocity.
      */
     void setVel( const Vector2d &vel );
+
+    /**
+     * The fluid velocity at the particle's position.
+     * @return  The surrounding velocity.
+     */
+    const Vector2d &getSurroundingVel() const;
+
+    /**
+     * Set the surrounding velocity.
+     * @param v_vel  New velocity.
+     */
+    void setSurroundingVel( const Vector2d &v_vel );
+
+    /**
+     * Get the time until next eddy.
+     * @return  Time until next eddy.
+     */
+    double getCountDown() const;
+
+    /**
+     * Set the time until next eddy.
+     * @param count_down  Time until next eddy.
+     */
+    void setCountDown( double count_down );
 };

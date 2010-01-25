@@ -180,6 +180,9 @@ void show_help()
             "      --mloop <enum> (=2)                     Model used to get the velocity profile:\n"
             "                                                1: Constant viscosity.\n"
             "                                                2: Prandtl mixing length.\n"
+            "      --mturb <enum> (=1)                     Model to use for eddies / velocity pertubations.\n"
+            "                                                0: None (no turbulence modelling).\n"
+            "                                                1: Discrete eddy model.\n"
             "\n"
             "Fluid Options:\n"
             "      --flmu <double> (=1.8e-005)             Fluid Dynamic Viscocity (Pa s).\n"
@@ -251,7 +254,8 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         >> Option( 'a', "wallbc",  param->channel.wallbc,       (int) WBC_VELOCITY )
         >> Option( 'a', "wallbv",  param->channel.wallbv,       0.0 )
         >> Option( 'a', "mbounce", param->channel.bounce_model, (int) BOUNCE_STICK )
-        >> Option( 'a', "mloop",   param->channel.loop_model,   (int) LM_PRANDTL );
+        >> Option( 'a', "mloop",   param->channel.loop_model,   (int) LM_PRANDTL )
+        >> Option( 'a', "mturb",   param->channel.turb_model,   (int) TURB_DISCRETE_EDDY );
         // Fluid Options
     ops >> Option( 'a', "flmu",  param->fl.mu,  1.8E-5 )
         >> Option( 'a', "flrho", param->fl.density, 1.0 );

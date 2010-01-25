@@ -22,12 +22,16 @@ Particle::Particle()
 {
     this->pos = Vector2d( 0, 0 );
     this->vel = Vector2d( 0, 0 );
+    this->v_vel = Vector2d( 0, 0 );
+    this->count_down = 0;
 }
 
 Particle::Particle( const Vector2d &pos, const Vector2d &vel )
 {
     this->pos = pos;
     this->vel = vel;
+    this->v_vel = Vector2d( 0, 0 );
+    this->count_down = 0;
 }
 
 
@@ -50,4 +54,24 @@ const Vector2d &Particle::getVel() const
 void Particle::setVel( const Vector2d &vel )
 {
     this->vel = vel;
+}
+
+const Vector2d &Particle::getSurroundingVel() const
+{
+    return v_vel;
+}
+
+void Particle::setSurroundingVel( const Vector2d &v_vel )
+{
+    this->v_vel = v_vel;
+}
+
+double Particle::getCountDown() const
+{
+    return count_down;
+}
+
+void Particle::setCountDown( double count_down )
+{
+    this->count_down = count_down;
 }
