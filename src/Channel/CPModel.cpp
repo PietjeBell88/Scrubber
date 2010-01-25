@@ -107,8 +107,16 @@ ScalarField CPModel::loopPrandtl( ScalarField u )
 #pragma omp parallel for
         for ( int i = 0; i <= n ; i++ )
         {
-            unew(i) = ( -pg * pow2( dy ) + prandtlMu( y_mu(i), dudy( u, i ) ) * u(i+1) + prandtlMu( y_mu(i-1), dudy( u, i-1 ) ) * u(i-1) ) /
-                      (prandtlMu( y_mu(i), dudy( u, i ) ) + prandtlMu( y_mu(i-1), dudy( u, i-1 ) )) *
+            // Readability. Calculate the prandtl mixing length and subsequently the
+            // viscosity at the top and bottom points.
+            const double l_b = prandtlLength( y_mu(i-1) );
+            const double l_t = prandtlLength( y_mu(i) );
+
+            const double mu_b = mu + pow2( l_b ) * rho * abs( dudy( u, i-1 ) );
+            const double mu_t = mu + pow2( l_t ) * rho * abs( dudy( u, i ) );
+
+            unew(i) = (-pg * pow2( dy ) + mu_t * u(i+1) + mu_b * u(i-1)) /
+                      (mu_t + mu_b) *
                       (1-relax) + u(i) * relax;
         }
 
@@ -122,18 +130,6 @@ ScalarField CPModel::loopPrandtl( ScalarField u )
         u = unew;
     }
     return u;
-}
-
-double CPModel::prandtlMu( double y, double dudy )
-{
-    double l_m = lambda * delta;
-
-    if ( y < lambda*delta/kappa )
-       l_m = kappa*y;
-    else if ( y > diameter - (lambda*delta/kappa) )
-       l_m = kappa*(diameter - y);
-
-    return mu + pow2( l_m ) * rho * abs(dudy);
 }
 
 double CPModel::froNorm( const ScalarField &new_field, const ScalarField &old_field )
@@ -194,7 +190,7 @@ ScalarField CPModel::init( ScalarField u )
     else if ( globbc == GBC_BULK_VEL )
     {
         // Guess a pressure gradient
-        pg = globbv / -1.0;
+        pg = globbv / -400.0;
 
         double error = 1000;
 
@@ -218,4 +214,16 @@ ScalarField CPModel::init( ScalarField u )
         }
     }
     return u;
+}
+
+double CPModel::prandtlLength( double y )
+{
+    double l_m = lambda * delta;
+
+    if ( y < lambda*delta/kappa )
+       l_m = kappa*y;
+    else if ( y > diameter - (lambda*delta/kappa) )
+       l_m = kappa*(diameter - y);
+
+    return l_m;
 }

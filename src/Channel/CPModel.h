@@ -79,14 +79,6 @@ protected:
     ScalarField loopPrandtl( ScalarField u );
 
     /**
-     * Viscosity based on the prandtl mixing length.
-     * @param y     Height at which the viscosity should be calculated.
-     * @param dudy  Derivative of the velocity at y.
-     * @return      The total viscosity ('normal' viscosity + turbulent viscosity)
-     */
-    double prandtlMu( double y, double dudy );
-
-    /**
      * Calculates the error between two ScalarFields based on the frobenius norm.
      * @param new_field  New ScalarField.
      * @param old_field  Old ScalarField.
@@ -132,4 +124,11 @@ public:
      * makes sure the global boundary condition is satisfied.
      */
     ScalarField init( ScalarField u );
+
+    /**
+     * Calculate the Prandtl mixing length.
+     * @param y     Height at which the mixing length should be calculated.
+     * @return      The Prandtl mixing length.
+     */
+    double CPModel::prandtlLength( double y );
 };
