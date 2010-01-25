@@ -157,7 +157,7 @@ void show_help()
             "      --dtscale <double> (=0.5)               dt = dtscale * systemtime.\n"
             "      --errork <double> (=1E-5)               The error threshold for the steady velocity profile.\n"
             "      --relax <double> (=0.9)                 Relaxation for prandtl mixing length. 0 = none, 0.99 = a lot.\n"
-            "      --gravangle <double> (=0)               Angle of gravity with the negative z-axis.\n"
+            "      --gravangle <double> (=0.0)             Angle of gravity with the negative z-axis.\n"
             "      --maxp <int> (=1000)                    Maximum number of particles, no new particles will be emitted\n"
             "                                                if the number of particles exceeds this parameter.\n"
             "\n"
@@ -165,21 +165,21 @@ void show_help()
             "      --height <double> (=75.0)               Height of the channel (m).\n"
             "      --radius <double> (=3.0)                Radius of the channel (m).\n"
             "      --n <double> (=800)                     Amount of \"volumes\" in the channel.\n"
-            "      --globbc <enum> (=1)                    Global boundary condition:\n"
+            "      --globbc <enum> (=2)                    Global boundary condition:\n"
             "                                                1: Pressure gradient (usually negative).\n"
             "                                                2: Bulk velocity (m/s).\n"
-            "      --globbv <double> (=-1)                 Global boundary value.\n"
-            "                                              ! Meaning dependent on --globbv. Standard SI-units. !\n"
+            "      --globbv <double> (=3.0)                Global boundary value.\n"
+            "                                              ! Meaning dependent on --globbc. Standard SI-units. !\n"
             "      --wallbc <enum> (=1)                    Boundary condition at the wall:\n"
             "                                                1: Velocity at the wall.\n"
             "                                                2: Velocity gradient at the wall.\n"
-            "      --wallbv <double> (=0)                  Wall boundary value.\n"
-            "                                              ! Meaning dependent on --wallbv. Standard SI-units. !\n"
+            "      --wallbv <double> (=0.0)                Wall boundary value.\n"
+            "                                              ! Meaning dependent on --wallbc. Standard SI-units. !\n"
             "      --mbounce <enum> (=1)                   Bounce condition for the particles/wall:\n"
             "                                                1: Stick to the wall.\n"
             "      --mloop <enum> (=2)                     Model used to get the velocity profile:\n"
             "                                                1: Constant viscosity.\n"
-            "                                                2: Prantl mixing length.\n"
+            "                                                2: Prandtl mixing length.\n"
             "\n"
             "Fluid Options:\n"
             "      --flmu <double> (=1.8e-005)             Fluid Dynamic Viscocity (Pa s).\n"
@@ -187,7 +187,7 @@ void show_help()
             "\n"
             "Particle Options:\n"
             "      --pdensity <double> (=1000.0)           Density of the particles (kg/m3).\n"
-            "      --pdiameter <double> (=5.0E-5)          Diameter of the particles (m).\n"
+            "      --pradius <double> (=3E-4)              Diameter of the particles (m).\n"
             "\n"
             "Emitter Options:\n"
             "      --etype <enum> (=1)                     Emitter type:\n"
@@ -246,8 +246,8 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
     ops >> Option( 'a', "height",  param->channel.height,       75.0 )
         >> Option( 'a', "radius",  param->channel.radius,       3.0 )
         >> Option( 'a', "n",       param->channel.n,            800 )
-        >> Option( 'a', "globbc",  param->channel.globbc,       (int) GBC_PRESSURE )
-        >> Option( 'a', "globbv",  param->channel.globbv,       -0.01 )
+        >> Option( 'a', "globbc",  param->channel.globbc,       (int) GBC_BULK_VEL )
+        >> Option( 'a', "globbv",  param->channel.globbv,       3.0 )
         >> Option( 'a', "wallbc",  param->channel.wallbc,       (int) WBC_VELOCITY )
         >> Option( 'a', "wallbv",  param->channel.wallbv,       0.0 )
         >> Option( 'a', "mbounce", param->channel.bounce_model, (int) BOUNCE_STICK )
@@ -257,7 +257,7 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         >> Option( 'a', "flrho", param->fl.density, 1.0 );
         // Particle Options
     ops >> Option( 'a', "pdensity", param->p.density,  1000.0 )
-        >> Option( 'a', "pradius",  param->p.radius,   1E-4 );
+        >> Option( 'a', "pradius",  param->p.radius,   3E-4 );
         // Emitter Options
     ops >> Option( 'a', "etype",   param->emitter.type, (int) EMITTER_ONCE )
         >> Option( 'a', "dim",     s_edim,              "[-3:30:3,60:1:60]" )
