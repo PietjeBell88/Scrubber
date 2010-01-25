@@ -43,15 +43,19 @@ Channel::~Channel() {}
 // Private methods
 Vector2d Channel::interpolate2d( const Vector2d &pos )
 {
+    // Position should be located in the channel
+    assert( abs( pos(0) ) <= radius );
+
     // Start by finding the lower index values of the box surrounding the particle.
-    int i = static_cast<int> (floor( (pos(0) + radius) / dx ));
+    // Remember that (inherent to the finite volume method) velocities are defined at edges of a volume.
+    int i = static_cast<int> (floor( (pos(0) + radius + 0.5 * dx) / dx ));
 
     /*
      * Calculate the weighting factors
      * Note: 0 <= x < 1
      * Modulo needs to be done on positive values.
      */
-    double x = fmod(pos(0) + radius, dx) / dx;
+    double x = fmod(pos(0) + radius + 0.5 * dx, dx) / dx;
 
     //Do a weighted addition
     return Vector2d( 0, u(i) * (1 - x) + u(i + 1) * x );
