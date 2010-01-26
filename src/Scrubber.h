@@ -61,10 +61,11 @@ enum OutputInfo
     OUTPUT_VELFIELD
 };
 
-enum OutputFormat
+enum InOutFormat
 {
-    OUTPUT_BYTE = 1,
-    OUTPUT_TEXT
+    INOUT_NOIMPORT,
+    INOUT_BYTE,
+    INOUT_TEXT
 };
 
 enum EmitterType
@@ -151,6 +152,13 @@ struct ScrubberParam
         double rate;            /// Emitting rate.
         Vector2d init_velocity; /// Initial velocity the particles are emitted with.
     } emitter;
+
+    // Input specific parameters
+    struct input
+    {
+        int format;   /// <enum> Input type.
+        string path;  /// Path to profile datafile.
+    } input;
 
     // Output specific parameters
     struct output

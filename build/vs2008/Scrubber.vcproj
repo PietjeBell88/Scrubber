@@ -537,30 +537,30 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Output"
+			Name="InOut"
 			>
 			<File
-				RelativePath="..\..\src\Output\ByteOutput.cpp"
+				RelativePath="..\..\src\InOut\ByteInOut.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Output\ByteOutput.h"
+				RelativePath="..\..\src\InOut\ByteInOut.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Output\Output.cpp"
+				RelativePath="..\..\src\InOut\InOut.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Output\Output.h"
+				RelativePath="..\..\src\InOut\InOut.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Output\TextOutput.cpp"
+				RelativePath="..\..\src\InOut\TextInOut.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Output\TextOutput.h"
+				RelativePath="..\..\src\InOut\TextInOut.h"
 				>
 			</File>
 		</Filter>

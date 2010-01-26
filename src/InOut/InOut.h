@@ -27,9 +27,9 @@ class ParticleArray;
 
 
 /**
- * Abstract class for outputting.
+ * Abstract class for reading and writing to and from files.
  */
-class Output
+class InOut
 {
 protected:
     OutputInfo outputinfo;
@@ -37,6 +37,7 @@ protected:
     double height;
     double radius;
     double dx;
+    int n;
 
     FILE *f;
 
@@ -56,14 +57,14 @@ public:
      * Constructor.
      * @param param  Struct of parameters.
      */
-    Output( const ScrubberParam &param );
+    InOut( const ScrubberParam &param );
 
     /**
      * Write the concentration of particles to the file.
      * @param first_call  True if this function is first called.
      * @param particles   Array of particles.
      */
-    virtual ~Output();
+    virtual ~InOut();
 
     /**
      * Write output to file.
@@ -78,4 +79,13 @@ public:
      * @param scalar_field ScalarField containting the velocity profile.
      */
     virtual void writeScalarField( const ScalarField &scalar_field ) = 0;    //FIXME: Should be private (and callable from writeToFile).
+
+    /**
+     * Read the velocity profile information from a file.
+     * In the process, read the amount of gridpoints and the stepsizes,
+     * and write these to the parameter struct.
+     * @param *param  Struct of parameters.
+     * @param *u      ScalarField to write the velocities to.
+     */
+    virtual void readProfile( ScrubberParam *param, ScalarField *u ) = 0;
 };

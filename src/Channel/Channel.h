@@ -69,10 +69,15 @@ public:
     virtual ~Channel();
 
     /**
-     * Initialize the channel.
-     * Generates the velocity profile in the channel by looping until steady.
+     * Initialize the channel by calculating the velocity profile.
      */
     void init();
+
+    /**
+     * Initialize the channel by copying in an existing velocity profile.
+     * @param u  The ScalarField to be used as the velocity profile.
+     */
+    void init( const ScalarField &u );
 
     /**
      * Checks if the particle has left the box on the sides, top, bottom or is still in the box.

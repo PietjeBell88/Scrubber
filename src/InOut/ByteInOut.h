@@ -16,16 +16,16 @@
 
 // Headers
 #include <fstream>
-#include "Output.h"
+#include "InOut.h"
 
 #include "Scrubber.h"
 #include "Typedefs.h"
 
 
 /**
- * Writes to the output in binary form.
+ * Writes to the output in binary form, and reads input from an identically formatted binary file.
  */
-class ByteOutput : public Output
+class ByteInOut : public InOut
 {
 protected:
     virtual void writePositions( bool first_call, double time, const ParticleArray &particles );
@@ -35,13 +35,15 @@ public:
      * Constructor.
      * @param param  Struct of parameters.
      */
-    ByteOutput( const ScrubberParam &param );
+    ByteInOut( const ScrubberParam &param );
 
     /**
      * Destructor.
      */
-    virtual ~ByteOutput();
+    virtual ~ByteInOut();
 
     //FIXME: Should be private.
     virtual void writeScalarField( const ScalarField &scalar_field );
+
+    virtual void readProfile( ScrubberParam *param, ScalarField *u );
 };

@@ -14,15 +14,15 @@
 
 
 // Headers
-#include "TextOutput.h"
+#include "TextInOut.h"
 
 #include "Particles/ParticleArray.h"
 #include "Particles/Particle.h"
 
 
 // Constructor / Destructor
-TextOutput::TextOutput( const ScrubberParam &param ) :
-                          Output( param )
+TextInOut::TextInOut( const ScrubberParam &param ) :
+                          InOut( param )
 {
     if ( param.output.info != OUTPUT_NOTHING )
     {
@@ -32,10 +32,13 @@ TextOutput::TextOutput( const ScrubberParam &param ) :
 	        printf( "Error in opening output file, exiting\n" );
 	        exit( 1 );
         }
+
+        // Write file type header
+        fwrite( &param.output.format, 4, 1, f );
     }
 }
 
-TextOutput::~TextOutput()
+TextInOut::~TextInOut()
 {
     if ( param.output.info != OUTPUT_NOTHING )
         fclose(f);
@@ -43,7 +46,7 @@ TextOutput::~TextOutput()
 
 
 // Private Methods
-inline void TextOutput::writePositions( bool first_call, double time, const ParticleArray &particles )
+inline void TextInOut::writePositions( bool first_call, double time, const ParticleArray &particles )
 {
     if ( first_call )
         fprintf( f, "#T      X      Y      C\n" );
@@ -62,12 +65,31 @@ inline void TextOutput::writePositions( bool first_call, double time, const Part
 
 
 // Public Methods
-void TextOutput::writeScalarField( const ScalarField &scalar_field )
+void TextInOut::writeScalarField( const ScalarField &scalar_field )
 {
     // Write header
-    fprintf( f, "dx = %e, radius = %e, n+2 = %d\n", dx, radius, scalar_field.shape()(0) );
+    fprintf( f, "dx = %e, radius = %e, n = %d\n", dx, radius, n );
 
     // Write the scalar values to file.
     for ( int i = 0; i < scalar_field.shape()(0); i++ )
         fprintf( f, "%e\n", scalar_field(i) );
+}
+
+void TextInOut::readProfile( ScrubberParam *param, ScalarField *u )
+{
+    FILE *f = fopen( param->input.path.c_str(), "r" );
+    // Skip the file type header
+    fseek ( f , 4 , SEEK_SET );
+
+    // Read the channel header
+    fscanf( f, "dx = %lf, radius = %lf, n = %d\n", &param->channel.dx, &param->channel.radius, &param->channel.n );
+
+    u->resize( param->channel.n + 2 );
+
+    // FIXME: Check if the lenght of the file is sufficient
+    // FIXME: Is there a way to not write the elements iteratively?
+    for( int i = 0; i < u->shape()(0); i++ )
+        fscanf( f, "%lf\n", &(*u)(i) );
+
+    fclose( f );
 }

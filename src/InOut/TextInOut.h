@@ -15,16 +15,16 @@
 #pragma once
 
 // Headers
-#include "Output.h"
+#include "InOut.h"
 
 #include "Scrubber.h"
 #include "Typedefs.h"
 
 
 /**
- * Writes to the output in humanly readable text form.
+ * Writes to the output in humanly readable text form, and reads input from an identically formatted text file.
  */
-class TextOutput : public Output
+class TextInOut : public InOut
 {
 protected:
     virtual void writePositions( bool first_call, double time, const ParticleArray &particles );
@@ -34,13 +34,15 @@ public:
      * Constructor.
      * @param param  Struct of parameters.
      */
-    TextOutput( const ScrubberParam &param );
+    TextInOut( const ScrubberParam &param );
 
     /**
      * Destructor.
      */
-    virtual ~TextOutput();
+    virtual ~TextInOut();
 
     //FIXME: Should be private.
     virtual void writeScalarField( const ScalarField &scalar_field );
+
+    virtual void readProfile( ScrubberParam *param, ScalarField *u );
 };

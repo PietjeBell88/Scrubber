@@ -20,9 +20,9 @@
 
 #include "getopt_pp.h"
 
-#include "Output/Output.h"
-#include "Output/ByteOutput.h"
-#include "Output/TextOutput.h"
+#include "InOut/InOut.h"
+#include "InOut/ByteInOut.h"
+#include "InOut/TextInOut.h"
 
 #include "Emitter/Emitter.h"
 #include "Emitter/GridEmitter.h"
@@ -56,15 +56,39 @@ int main( int argc, char* argv[] )
     parse( argc, argv, &param );
     printParam( param );
 
-    // Making the Output
-    Output * output;
+    ScalarField u;
+
+    if ( param.input.format > INOUT_NOIMPORT )
+    {
+        // Making the input reader and read the velocity profile
+        InOut * input;
+
+        switch ( param.input.format ) {
+            case INOUT_BYTE:
+                input = new ByteInOut( param );
+                break;
+            case INOUT_TEXT:
+                input = new TextInOut( param );
+                break;
+            default:
+                cout << "Unknown input type.";
+                break;
+        }
+
+        input->readProfile( &param, &u );
+
+        delete input;
+    }
+
+    // Making the output writer
+    InOut * output;
 
     switch ( param.output.format ) {
-        case OUTPUT_BYTE:
-            output = new ByteOutput( param );
+        case INOUT_BYTE:
+            output = new ByteInOut( param );
             break;
-        case OUTPUT_TEXT:
-            output = new TextOutput( param );
+        case INOUT_TEXT:
+            output = new TextInOut( param );
             break;
         default:
             cout << "Unknown output type.";
@@ -74,7 +98,10 @@ int main( int argc, char* argv[] )
     // Making the channel
     Channel *channel = new Channel( param );
 
-    channel->init();
+    if ( param.input.format == INOUT_NOIMPORT )
+        channel->init();
+    else
+        channel->init( u );
 
     if ( param.output.info == OUTPUT_VELFIELD )
     {
@@ -203,6 +230,8 @@ void show_help()
             "      --rate <double> (=100.0)                Amount of particles emitted per second.\n"
             "      --initvel <string> (=[0,0])             Particle's initial velocity in m/s.\n"
             "\n"
+            "Input Options:\n"
+            "      --profile <string> (=\"\")                Path to profile data (Leave empty to calculate).\n"
             "Output Options:\n"
             "      --oformat <int> (=1)                    Output formats:\n"
             "                                                1: Byte\n"
@@ -267,8 +296,10 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         >> Option( 'a', "dim",     s_edim,              "[-3:30:3,60:1:60]" )
         >> Option( 'a', "rate",    param->emitter.rate, 100.0 )
         >> Option( 'a', "initvel", s_initvel,           "[0,0]" );
+        // Input Options
+    ops >> Option( 'a', "profile", param->input.path,   "" );
         // Output Options
-    ops >> Option( 'a', "oformat", param->output.format,  (int) OUTPUT_BYTE )
+    ops >> Option( 'a', "oformat", param->output.format,  (int) INOUT_BYTE )
         >> Option( 'a', "oinfo",   param->output.info,    (int) OUTPUT_NOTHING )
         >> Option( 'a', "oint",    param->output.interval, 1.0 )
         >> Option( 'a', "out",     param->output.path,     "test.data" );
@@ -301,13 +332,29 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
             param->maxparticles = param->emitter.p_N;
     }
 
-
     param->beta = param->p.density / param->fl.density;
 
     param->tau_p = param->p.density * 4 * param->p.radius * param->p.radius / (18 * param->fl.nu);
     param->tau_a = (param->beta + 0.5) / param->beta * param->tau_p;
 
     param->dt = param->dtscale * param->tau_p;
+
+    // Check for possible input
+    if ( param->input.path == "" )
+        param->input.format = INOUT_NOIMPORT;
+    else
+    {
+        FILE *f;
+        if( (f = fopen( param->input.path.c_str(), "r" )) == NULL )
+        {
+           printf("Problem opening profile file %s.\n", param->input.path.c_str());
+           exit( 1 );
+        }
+
+        // Read the file type
+        fread( &param->input.format, 4, 1, f );
+        fclose( f );
+    }
 
     // Can't output more data than we have
     if ( param->output.interval < param->dt )

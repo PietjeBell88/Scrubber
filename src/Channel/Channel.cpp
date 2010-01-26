@@ -81,6 +81,11 @@ void Channel::init()
     u = cpmodel->init( u );
 }
 
+void Channel::init( const ScalarField &u )
+{
+    this->u = u;
+}
+
 PosBox Channel::outsideBox( const Vector2d &pos )
 {
     if ( pos(1) >= height )

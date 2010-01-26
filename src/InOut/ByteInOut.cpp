@@ -14,15 +14,15 @@
 
 
 // Headers
-#include "ByteOutput.h"
+#include "ByteInOut.h"
 
 #include "Particles/ParticleArray.h"
 #include "Particles/Particle.h"
 
 
 // Constructor / Destructor
-ByteOutput::ByteOutput( const ScrubberParam &param ) :
-                          Output( param )
+ByteInOut::ByteInOut( const ScrubberParam &param ) :
+                          InOut( param )
 {
     if ( param.output.info != OUTPUT_NOTHING )
     {
@@ -32,10 +32,13 @@ ByteOutput::ByteOutput( const ScrubberParam &param ) :
 	        printf( "Error in opening output file, exiting\n" );
 	        exit( 1 );
         }
+
+        // Write file type header
+        fwrite( &param.output.format, 4, 1, f );
     }
 }
 
-ByteOutput::~ByteOutput()
+ByteInOut::~ByteInOut()
 {
     if ( param.output.info != OUTPUT_NOTHING )
         fclose( f );
@@ -43,7 +46,7 @@ ByteOutput::~ByteOutput()
 
 
 // Private Methods
-inline void ByteOutput::writePositions( bool first_call, double time, const ParticleArray &particles )
+inline void ByteInOut::writePositions( bool first_call, double time, const ParticleArray &particles )
 {
     if ( first_call )
     {
@@ -73,13 +76,13 @@ inline void ByteOutput::writePositions( bool first_call, double time, const Part
 
 
 // Public Methods
-void ByteOutput::writeScalarField( const ScalarField &scalar_field )
+void ByteInOut::writeScalarField( const ScalarField &scalar_field )
 {
     // Write header
     double buf1[] = { dx, radius };
     fwrite( buf1, 8, 2, f );
 
-    int buf2[] = { scalar_field.shape()(0) };
+    int buf2[] = { n };
     fwrite( buf2, 4, 1, f );
 
     // Write the scalar values to file.
@@ -88,4 +91,25 @@ void ByteOutput::writeScalarField( const ScalarField &scalar_field )
         double buf3[] = { scalar_field(i) };
         fwrite( buf3, 8, 1, f );
      }
+}
+
+void ByteInOut::readProfile( ScrubberParam *param, ScalarField *u )
+{
+    FILE *f = fopen( param->input.path.c_str(), "rb" );
+    // Skip the file type header
+    fseek ( f , 4 , SEEK_SET );
+
+    // Read the channel header
+    fread( &param->channel.dx,     8, 1, f );
+    fread( &param->channel.radius, 8, 1, f );
+    fread( &param->channel.n,      4, 1, f );
+
+    u->resize( param->channel.n + 2 );
+
+    // FIXME: Check if the lenght of the file is sufficient
+    // FIXME: Is there a way to not write the elements iteratively?
+    for( int i = 0; i < u->shape()(0); i++ )
+        fread( &(*u)(i), 8, 1, f );
+
+    fclose( f );
 }

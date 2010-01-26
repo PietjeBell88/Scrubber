@@ -14,7 +14,7 @@
 
 
 // Headers
-#include "Output.h"
+#include "InOut.h"
 
 #include "Typedefs.h"
 #include "Particles/ParticleArray.h"
@@ -22,7 +22,7 @@
 
 
 // Constructor / Destructor
-Output::Output( const ScrubberParam &param )
+InOut::InOut( const ScrubberParam &param )
 {
     // FIXME: Cast to enum from integer (thanks to parameter parser sucking).
     this->outputinfo = (OutputInfo) param.output.info;
@@ -30,15 +30,16 @@ Output::Output( const ScrubberParam &param )
     this->height = param.channel.height;
     this->radius = param.channel.radius;
     this->dx = param.channel.dx;
+    this->n = param.channel.n;
 
     this->param = param; // only needed for outputting cmdline options
 }
 
-Output::~Output() {}
+InOut::~InOut() {}
 
 
 // Public Methods
-void Output::writeToFile( double time, const ParticleArray &particles )
+void InOut::writeToFile( double time, const ParticleArray &particles )
 {
     static bool first_call = true;
 
@@ -55,4 +56,3 @@ void Output::writeToFile( double time, const ParticleArray &particles )
     }
     first_call = false;
 }
-
