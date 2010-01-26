@@ -105,7 +105,7 @@ ScalarField CPModel::loopPrandtl( ScalarField u )
     while ( error > errork )
     {
 #pragma omp parallel for
-        for ( int i = 0; i <= n ; i++ )
+        for ( int i = 1; i <= n ; i++ )
         {
             // Readability. Calculate the prandtl mixing length and subsequently the
             // viscosity at the top and bottom points.
