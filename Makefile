@@ -11,4 +11,4 @@ SRCS  = ./external/getopt_pp.cpp \
 CXXFLAGS = -O2 -DNDEBUG
 
 default:
-    g++ $(CXXFLAGS) -I../Include/blitz-0.9 -I. -I./external -I./src $(SRCS) -o scrubber
+	g++ $(CXXFLAGS) -I../Include/blitz-0.9 -I. -I./external -I./src $(SRCS) -o scrubber

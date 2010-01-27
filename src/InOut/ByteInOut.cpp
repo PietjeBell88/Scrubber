@@ -99,17 +99,20 @@ void ByteInOut::readProfile( ScrubberParam *param, ScalarField *u )
     // Skip the file type header
     fseek ( f , 4 , SEEK_SET );
 
+    // Shut up warnings
+    int nread;
+
     // Read the channel header
-    fread( &param->channel.dx,     8, 1, f );
-    fread( &param->channel.radius, 8, 1, f );
-    fread( &param->channel.n,      4, 1, f );
+    nread = fread( &param->channel.dx,     8, 1, f );
+    nread = fread( &param->channel.radius, 8, 1, f );
+    nread = fread( &param->channel.n,      4, 1, f );
 
     u->resize( param->channel.n + 2 );
 
     // FIXME: Check if the lenght of the file is sufficient
     // FIXME: Is there a way to not write the elements iteratively?
     for( int i = 0; i < u->shape()(0); i++ )
-        fread( &(*u)(i), 8, 1, f );
+        nread = fread( &(*u)(i), 8, 1, f );
 
     fclose( f );
 }

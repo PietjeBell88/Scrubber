@@ -62,7 +62,7 @@ protected:
      * @param u  Profile which will be filled.
      * @return   Velocity profile.
      */
-    ScalarField CPModel::velocityProfile( ScalarField u );
+    ScalarField velocityProfile( ScalarField u );
 
     /**
      * Use the simple model to get a steady solution.
@@ -137,6 +137,5 @@ public:
      * @param y     Height at which the mixing length should be calculated.
      * @return      The Prandtl mixing length.
      */
-    double CPModel::prandtlLength( double y );
-
+    double prandtlLength( double y );
 };

@@ -359,7 +359,7 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         }
 
         // Read the file type
-        fread( &param->input.format, 4, 1, f );
+        int nread = fread( &param->input.format, 4, 1, f );
         fclose( f );
     }
 

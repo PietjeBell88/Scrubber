@@ -81,15 +81,18 @@ void TextInOut::readProfile( ScrubberParam *param, ScalarField *u )
     // Skip the file type header
     fseek ( f , 4 , SEEK_SET );
 
+    // Shut up warnings
+    int nread;
+
     // Read the channel header
-    fscanf( f, "dx = %lf, radius = %lf, n = %d\n", &param->channel.dx, &param->channel.radius, &param->channel.n );
+    nread = fscanf( f, "dx = %lf, radius = %lf, n = %d\n", &param->channel.dx, &param->channel.radius, &param->channel.n );
 
     u->resize( param->channel.n + 2 );
 
     // FIXME: Check if the lenght of the file is sufficient
     // FIXME: Is there a way to not write the elements iteratively?
     for( int i = 0; i < u->shape()(0); i++ )
-        fscanf( f, "%lf\n", &(*u)(i) );
+        nread = fscanf( f, "%lf\n", &(*u)(i) );
 
     fclose( f );
 }
