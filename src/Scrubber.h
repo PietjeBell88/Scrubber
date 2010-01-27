@@ -45,7 +45,8 @@ enum BounceModel
 enum LoopModel
 {
     LM_SIMPLE = 1,
-    LM_PRANDTL
+    LM_PRANDTL,
+    LM_VAN_DRIEST
 };
 
 enum TurbModel

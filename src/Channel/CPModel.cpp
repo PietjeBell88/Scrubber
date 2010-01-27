@@ -61,6 +61,9 @@ ScalarField CPModel::velocityProfile( ScalarField u )
         case LM_PRANDTL:
             u = loopPrandtl( u );
             break;
+        case LM_VAN_DRIEST:
+            u = loopVanDriest( u );
+            break;
         default:
             printf( "Unkown loop_model [%d], stopping...\n", loop_model );
             break;
@@ -114,6 +117,49 @@ ScalarField CPModel::loopPrandtl( ScalarField u )
 
             const double mu_b = mu + pow2( l_b ) * rho * abs( dudy( u, i-1 ) );
             const double mu_t = mu + pow2( l_t ) * rho * abs( dudy( u, i ) );
+
+            unew(i) = (-pg * pow2( dy ) + mu_t * u(i+1) + mu_b * u(i-1)) /
+                      (mu_t + mu_b) *
+                      (1-relax) + u(i) * relax;
+        }
+
+        // Set the ghost point
+        setGhost( &unew );
+
+       // Get the new error
+        error = froNorm( unew, u );
+
+        // Write the new values to u
+        u = unew;
+    }
+    return u;
+}
+
+ScalarField CPModel::loopVanDriest( ScalarField u )
+{ScalarField unew( u.shape() );
+    unew = 0;
+
+    double error = 10000;
+
+    // Loop while the error is too big.
+    while ( error > errork )
+    {
+#pragma omp parallel for
+        for ( int i = 1; i <= n ; i++ )
+        {
+            // Readability. Calculate the prandtl mixing length and subsequently the
+            // viscosity at the top and bottom points.
+            const double l_b = prandtlLength( y_mu(i-1) );
+            const double l_t = prandtlLength( y_mu(i) );
+
+            const double y_a_b = y_mu(i-1) * abs( l_b ) * abs( dudy( u, i-1 ) ) / (25 * nu);
+            const double y_a_t = y_mu(i) * abs( l_t ) * abs( dudy( u, i ) ) / (25 * nu);
+
+            const double l_b_vd = l_b * (1 - exp( -y_a_b ) );
+            const double l_t_vd = l_t * (1 - exp( -y_a_t ) );
+
+            const double mu_b = mu + pow2( l_b_vd ) * rho * abs( dudy( u, i-1 ) );
+            const double mu_t = mu + pow2( l_t_vd ) * rho * abs( dudy( u, i ) );
 
             unew(i) = (-pg * pow2( dy ) + mu_t * u(i+1) + mu_b * u(i-1)) /
                       (mu_t + mu_b) *

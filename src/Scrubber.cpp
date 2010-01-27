@@ -204,9 +204,10 @@ void show_help()
             "                                              ! Meaning dependent on --wallbc. Standard SI-units. !\n"
             "      --mbounce <enum> (=1)                   Bounce condition for the particles/wall:\n"
             "                                                1: Stick to the wall.\n"
-            "      --mloop <enum> (=2)                     Model used to get the velocity profile:\n"
+            "      --mloop <enum> (=3)                     Model used to get the velocity profile:\n"
             "                                                1: Constant viscosity.\n"
             "                                                2: Prandtl mixing length.\n"
+            "                                                3: Van Driest model.\n"
             "      --mturb <enum> (=1)                     Model to use for eddies / velocity pertubations.\n"
             "                                                0: None (no turbulence modelling).\n"
             "                                                1: Discrete eddy model.\n"
@@ -284,7 +285,7 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         >> Option( 'a', "wallbc",  param->channel.wallbc,       (int) WBC_VELOCITY )
         >> Option( 'a', "wallbv",  param->channel.wallbv,       0.0 )
         >> Option( 'a', "mbounce", param->channel.bounce_model, (int) BOUNCE_STICK )
-        >> Option( 'a', "mloop",   param->channel.loop_model,   (int) LM_PRANDTL )
+        >> Option( 'a', "mloop",   param->channel.loop_model,   (int) LM_VAN_DRIEST )
         >> Option( 'a', "mturb",   param->channel.turb_model,   (int) TURB_DISCRETE_EDDY );
         // Fluid Options
     ops >> Option( 'a', "flmu",  param->fl.mu,  1.8E-5 )

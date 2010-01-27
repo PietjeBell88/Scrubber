@@ -78,6 +78,13 @@ protected:
      */
     ScalarField loopPrandtl( ScalarField u );
 
+     /**
+     * Use the Van Driest model to get a steady solution.
+     * @param u  Profile which will be calculated.
+     * @return   Calculated profile.
+     */
+    ScalarField loopVanDriest( ScalarField u );
+
     /**
      * Calculates the error between two ScalarFields based on the frobenius norm.
      * @param new_field  New ScalarField.
@@ -131,4 +138,5 @@ public:
      * @return      The Prandtl mixing length.
      */
     double CPModel::prandtlLength( double y );
+
 };
