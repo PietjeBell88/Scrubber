@@ -210,6 +210,7 @@ void show_help()
             "      --mturb <enum> (=1)                     Model to use for eddies / velocity pertubations.\n"
             "                                                0: None (no turbulence modelling).\n"
             "                                                1: Discrete eddy model.\n"
+            "                                                2: Langevin model.\n"
             "\n"
             "Fluid Options:\n"
             "      --flmu <double> (=1.8e-005)             Fluid Dynamic Viscocity (Pa s).\n"

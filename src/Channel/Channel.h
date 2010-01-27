@@ -29,6 +29,8 @@ class CPModel;
 class Channel
 {
 protected:
+    double dt;
+
     double height;
     double radius;
 

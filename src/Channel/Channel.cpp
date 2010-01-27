@@ -24,6 +24,8 @@
 // Constructor / Destructor
 Channel::Channel( const ScrubberParam &param )
 {
+    this->dt = param.dt;
+
     this->height = param.channel.height;
     this->radius = param.channel.radius;
 
@@ -109,34 +111,66 @@ void Channel::velocityAt( const Vector2d &pos, const Vector2d &vel, Vector2d *v_
 {
     Vector2d mean_velocity = Vector2d( 0, interpolate2d( pos ) );
 
+    // Random number generator
+    MTRand myran;
+
+    // Readability
+    const double u_acc = cpmodel->prandtlLength( radius - abs( pos(0) ) ) * abs( dudy( pos ) );
+    const double sigma = abs( u_acc );
+
     if ( turb_model == TURB_NONE )
         *v_vel = mean_velocity;
 
     else if ( turb_model == TURB_DISCRETE_EDDY )
     {
-        MTRand myran;
-
-        // Discrete-eddy model
-        // readability
+        // Constants
         const double C_T = 0.3;
-
-        const double u_acc = cpmodel->prandtlLength( pos(0) ) * abs( dudy( pos ) );
-        const double sigma = abs( u_acc );
 
         const Vector2d new_velocity( myran.randNorm( mean_velocity(0), sigma ), myran.randNorm( mean_velocity(1), sigma ) );
 
+        // Characteristic times/lengths
         const double T_eddy = C_T / abs( dudy( pos ) );
         const double L_eddy = T_eddy * sigma;
-        // FIXME: Check if norm is always positive.
         const double T_res = L_eddy / blitz::norm( vel - new_velocity );
 
         *count_down = min( T_res, T_eddy );
         *v_vel = new_velocity;
     }
 
+    else if ( turb_model == TURB_LANGEVIN )
+    {
+        // Readability
+        const Vector2d surr_vel = *v_vel;
+
+        // Constants
+        const double C_T = 0.24;
+        const double beta = 1.8;
+
+        // If u_acc was zero, avoid dividing by zero and return immediately
+        if ( u_acc == 0 )
+
+            *v_vel = Vector2d( 0, mean_velocity(1) );
+
+        else
+        {
+            // Characteristic times
+            const double T_L = C_T / u_acc;
+            const double T_Lstar = T_L / sqrt( 1 + pow2( beta * blitz::norm( vel - surr_vel ) / sigma ) );
+            const double R_L( exp( -dt / T_Lstar ) );
+
+            Vector2d new_vel( R_L * surr_vel(0) + sqrt( 1 - pow2( R_L ) ) * myran.randNorm( 0, sigma ),
+                              mean_velocity(1) );
+            *v_vel = new_vel;
+        }
+
+    }
+
     // FIXME: Checking should be done in parsing of commandline arguments.
     else
+    {
         printf( "Unkown turb_model [%d], stopping...\n", turb_model );
+        exit( 1 );
+    }
 }
 
 const ScalarField &Channel::getVelocityField() const

@@ -27,6 +27,7 @@ private:
     Vector2d pos;
     Vector2d vel;
 
+    // FIXME: Not all these turbulence variables will be used in every turbulence model (unnecessary memory usage).
     // Turbulence model parameters
     Vector2d v_vel;
     double count_down;

@@ -51,7 +51,8 @@ enum LoopModel
 enum TurbModel
 {
     TURB_NONE,
-    TURB_DISCRETE_EDDY
+    TURB_DISCRETE_EDDY,
+    TURB_LANGEVIN
 };
 
 enum OutputInfo
