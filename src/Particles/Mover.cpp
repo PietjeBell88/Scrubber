@@ -28,6 +28,11 @@ Mover::Mover( const ScrubberParam &param, Channel *channel )
     this->beta = param.beta;
     this->tau_a = param.tau_a;
 
+    this->c_restitution = param.channel.c_restitution;
+    this->c_friction = param.channel.c_friction;
+
+    this->radius = param.channel.radius;
+
     // FIXME: Cast to enum from integer (thanks to parameter parser sucking).
     this->bounce_model = (BounceModel) param.channel.bounce_model;
 
@@ -37,11 +42,28 @@ Mover::Mover( const ScrubberParam &param, Channel *channel )
 
 
 // Private Methods
-void Mover::bounceWall( const Vector2d &old_pos, Vector2d *new_pos, Vector2d *new_vel )
+void Mover::bounceWall( const Vector2d &old_pos, Vector2d *new_pos, Vector2d *vel )
 {
     switch( bounce_model ) {
         case BOUNCE_STICK:
             // Already handled in doMove()
+            break;
+        case BOUNCE_SLICOLL:
+            const Vector2d old_vel = *vel;
+
+            // Time it took the particle to get to the wall from its old position
+            const double time_before = ( radius - abs( old_pos(0) ) ) / abs( old_vel(0) );
+
+            // Position of particle when it hit the wall
+            const Vector2d wall_pos( ( old_pos(0) < 0 ) ? -radius : radius,
+                                     old_pos(1) + time_before * old_vel(1) );
+
+            // New velocity
+            *vel = Vector2d( - c_restitution * old_vel(0),
+                             old_vel(1) + c_friction * ( 1 + c_restitution ) * old_vel(0) );
+
+            // New position
+            *new_pos = wall_pos + (*vel) * ( dt - time_before );
             break;
     }
 }

@@ -204,6 +204,9 @@ void show_help()
             "                                              ! Meaning dependent on --wallbc. Standard SI-units. !\n"
             "      --mbounce <enum> (=1)                   Bounce condition for the particles/wall:\n"
             "                                                1: Stick to the wall.\n"
+            "                                                2: Sliding collision:\n"
+            "      --cor <double> (=1.0)                         - Coefficient of restitution.\n"
+            "      --friction <double> (=0.0)                    - Friction coefficient of the wall.\n"
             "      --mloop <enum> (=3)                     Model used to get the velocity profile:\n"
             "                                                1: Constant viscosity.\n"
             "                                                2: Prandtl mixing length.\n"
@@ -285,6 +288,8 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         >> Option( 'a', "wallbc",  param->channel.wallbc,       (int) WBC_VELOCITY )
         >> Option( 'a', "wallbv",  param->channel.wallbv,       0.0 )
         >> Option( 'a', "mbounce", param->channel.bounce_model, (int) BOUNCE_STICK )
+        >> Option( 'a', "cor",     param->channel.c_restitution, 1.0 )
+        >> Option( 'a', "friction", param->channel.c_friction,  0.0 )
         >> Option( 'a', "mloop",   param->channel.loop_model,   (int) LM_VAN_DRIEST )
         >> Option( 'a', "mturb",   param->channel.turb_model,   (int) TURB_DISCRETE_EDDY );
         // Fluid Options

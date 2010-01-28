@@ -37,6 +37,11 @@ private:
     double beta;
     double tau_a;
 
+    double c_restitution;
+    double c_friction;
+
+    double radius;
+
     BounceModel bounce_model;
 
     Channel *channel;

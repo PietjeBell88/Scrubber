@@ -40,6 +40,7 @@ enum PosBox
 enum BounceModel
 {
     BOUNCE_STICK = 1,
+    BOUNCE_SLICOLL,
 };
 
 enum LoopModel
@@ -122,7 +123,10 @@ struct ScrubberParam
         int globbc;       /// <enum> Global boundary condition.
         double globbv;    /// Value of global boundary condition.
 
-        int bounce_model; /// <enum> Sticky walls etc.
+        int bounce_model;     /// <enum> Sticky walls etc.
+        double c_restitution; /// Restitution coefficient
+        double c_friction;    /// Friction coefficient
+
         int loop_model;   /// <enum> Model used to get fluid velocity profile in the channel.
         int turb_model;   /// <enum> Indicates what model to use for generation of eddies/pertubations.
     } channel;
