@@ -35,7 +35,7 @@ protected:
     virtual Vector2d startVel( int p );
 
 public:
-    RandomEmitter( const ScrubberParam &param );
+    RandomEmitter( const ScrubberParam &param, Channel *channel );
 
     virtual ~RandomEmitter();
 

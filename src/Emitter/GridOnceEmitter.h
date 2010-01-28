@@ -32,7 +32,7 @@ protected:
     Vector2d startVel( int p );
 
 public:
-    GridOnceEmitter( const ScrubberParam &param );
+    GridOnceEmitter( const ScrubberParam &param, Channel *channel );
 
     virtual ~GridOnceEmitter();
 

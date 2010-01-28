@@ -19,10 +19,12 @@
 #include "Particles/ParticleArray.h"
 #include "Particles/Particle.h"
 
+#include "Channel/Channel.h"
+
 
 // Constructor / Destructor
-GridOnceEmitter::GridOnceEmitter( const ScrubberParam &param ) :
-    Emitter( param )
+GridOnceEmitter::GridOnceEmitter( const ScrubberParam &param, Channel *channel ) :
+    Emitter( param, channel )
 {}
 
 GridOnceEmitter::~GridOnceEmitter() {}
@@ -53,7 +55,13 @@ Vector2d GridOnceEmitter::startVel( int p )
 void GridOnceEmitter::init( ParticleArray *particles )
 {
     for ( int p = 0; p < p_N; p++ )
-        particles->add( Particle( startPos( p ), startVel( p ) ) );
+    {
+        const Vector2d pos = startPos( p );
+        const Vector2d vel = startVel( p );
+
+        if ( channel->outsideBox( pos ) == P_INSIDE )
+            particles->add( Particle( pos, vel ) );
+    }
 }
 
 void GridOnceEmitter::update( double relative_time, ParticleArray *particles )

@@ -21,10 +21,12 @@
 #include "Particles/ParticleArray.h"
 #include "Particles/Particle.h"
 
+#include "Channel/Channel.h"
+
 
 // Constructor / Destructor
-RandomEmitter::RandomEmitter( const ScrubberParam &param ) :
-    Emitter( param )
+RandomEmitter::RandomEmitter( const ScrubberParam &param, Channel *channel ) :
+    Emitter( param, channel )
 {
     last_emit_time = 0;
 }
@@ -57,15 +59,24 @@ void RandomEmitter::init( ParticleArray *particles ) {}
 
 void RandomEmitter::update( double relative_time, ParticleArray *particles )
 {
-    int to_emit = static_cast<int> ( floor( (relative_time - last_emit_time) * p_rate ) );
+    double to_emit = (relative_time - last_emit_time) * p_rate;
 
-    if ( to_emit >= 1 )
-        last_emit_time = relative_time;
+    if ( to_emit >= 1.0 )
+    {
+        // Set the last emit time, and compensate for the "residue particle(s)".
+        last_emit_time = relative_time - fmod( to_emit, 1.0 ) / p_rate;
+    }
 
     while ( (particles->getMaxLength() - particles->getLength()) >= 1
-            && to_emit >= 1 )
+            && to_emit >= 1.0 )
     {
-        particles->add( Particle( startPos( 0 ), startVel( 0 ) ) );
-        to_emit--;
+        const Vector2d pos = startPos( 0 );
+        const Vector2d vel = startVel( 0 );
+
+        if ( channel->outsideBox( pos ) == P_INSIDE )
+        {
+            particles->add( Particle( pos, vel ) );
+            to_emit--;
+        }
     }
 }

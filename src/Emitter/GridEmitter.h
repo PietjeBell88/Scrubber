@@ -29,8 +29,11 @@ class GridEmitter: public Emitter
 protected:
     double last_emit_time; // Relative time at which the last particles were emitted
 
+    // Keep track of the particles that were supposed to be emitted outside the channel.
+    int left_over;
+
 public:
-    GridEmitter( const ScrubberParam &param );
+    GridEmitter( const ScrubberParam &param, Channel *channel );
 
     virtual ~GridEmitter();
 

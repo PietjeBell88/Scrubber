@@ -19,12 +19,15 @@
 #include "Particles/ParticleArray.h"
 #include "Particles/Particle.h"
 
+#include "Channel/Channel.h"
+
 
 // Constructor / Destructor
-GridEmitter::GridEmitter( const ScrubberParam &param ) :
-    Emitter( param )
+GridEmitter::GridEmitter( const ScrubberParam &param, Channel *channel ) :
+    Emitter( param, channel )
 {
     last_emit_time = 0;
+    left_over = 0;
 }
 
 GridEmitter::~GridEmitter() {}
@@ -48,19 +51,39 @@ Vector2d GridEmitter::startVel( int p )
 void GridEmitter::init( ParticleArray *particles )
 {
     for ( int p = 0; p < p_N; p++ )
-        particles->add( Particle( startPos( p ), startVel( p ) ) );
+    {
+        const Vector2d pos = startPos( p );
+        const Vector2d vel = startVel( p );
+
+        if ( channel->outsideBox( pos ) == P_INSIDE )
+            particles->add( Particle( pos, vel ) );
+        else
+            left_over++;
+    }
 }
 
 void GridEmitter::update( double relative_time, ParticleArray *particles )
 {
     // Saving up particles until there are enough saved up to emit in the grid:
-    if ( (relative_time - last_emit_time) * p_rate >= p_N
-            && (particles->getMaxLength() - particles->getLength()) >= p_N )
+    const double possible_particles = (relative_time - last_emit_time) * p_rate + left_over;
+
+    if ( possible_particles >= p_N
+         && (particles->getMaxLength() - particles->getLength()) >= p_N )
     {
-        last_emit_time = relative_time;
+        // Set the last emit time, and compensate for the "residue particle(s)".
+        last_emit_time = relative_time - ( possible_particles - p_N ) / p_rate;
+        left_over = 0;
 
         // Emit:
         for ( int p = 0; p < p_N; p++ )
-            particles->add( Particle( startPos( p ), startVel( p ) ) );
+        {
+            const Vector2d pos = startPos( p );
+            const Vector2d vel = startVel( p );
+
+            if ( channel->outsideBox( pos ) == P_INSIDE )
+                particles->add( Particle( pos, vel ) );
+            else
+                left_over++;
+        }
     }
 }

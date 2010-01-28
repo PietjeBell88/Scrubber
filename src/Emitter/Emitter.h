@@ -48,6 +48,8 @@ protected:
     double p_rate;
     Vector2d init_velocity;
 
+    Channel *channel;
+
     /**
      * Returns the start position of a particle.
      * @param p  Number of the particle (i.e. emit position can be particle number dependant)
@@ -63,9 +65,10 @@ protected:
 public:
     /**
      * Constructor.
-     * @param param  Struct of parameters.
+     * @param param     Struct of parameters.
+     * @param *channel  The channel with its dimensions.
      */
-    Emitter( const ScrubberParam &param );
+    Emitter( const ScrubberParam &param, Channel *channel );
 
     /**
      * Destructor.

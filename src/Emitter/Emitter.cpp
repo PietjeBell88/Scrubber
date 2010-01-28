@@ -21,7 +21,7 @@
 
 
 // Constructor / Destructor
-Emitter::Emitter( const ScrubberParam &param )
+Emitter::Emitter( const ScrubberParam &param, Channel *channel )
 {
     // Save the variables (readability)
     this->p_density = param.p.density;
@@ -35,6 +35,8 @@ Emitter::Emitter( const ScrubberParam &param )
     this->p_N = param.emitter.p_N;
 
     this->p_rate = param.emitter.rate;
+
+    this->channel = channel;
 }
 
 Emitter::~Emitter() {}

@@ -123,13 +123,13 @@ int main( int argc, char* argv[] )
 
     switch ( param.emitter.type ) {
         case EMITTER_ONCE:
-            emitter = new GridOnceEmitter( param );
+            emitter = new GridOnceEmitter( param, channel );
             break;
         case EMITTER_GRID:
-            emitter = new GridEmitter( param );
+            emitter = new GridEmitter( param, channel );
             break;
         case EMITTER_RANDOM:
-            emitter = new RandomEmitter( param );
+            emitter = new RandomEmitter( param, channel );
             break;
         default:
             cout << "Unknown Emitter type";
@@ -158,6 +158,8 @@ int main( int argc, char* argv[] )
         // Move the particles
         mover->doMove( &particles );
 
+        emitter->update( time, &particles );
+
         // Write to file
         if ( time >= time_next_output )
         {
@@ -165,13 +167,14 @@ int main( int argc, char* argv[] )
             time_next_output += param.output.interval;
         }
 
-        emitter->update( time, &particles );
-
         time += param.dt;
 
         // Break when there are no more particles to plot.
-        if ( particles.getLength() == 0 )
+        if ( param.emitter.type == EMITTER_ONCE
+             && particles.getLength() == 0 )
+        {
             break;
+        }
     }
 
     delete output;
