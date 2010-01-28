@@ -111,6 +111,13 @@ int main( int argc, char* argv[] )
         return 0;
     }
 
+    // Checking if the particles are heavy enough.
+    // FIXME: Should be done in the mover?
+    double max_velocity = max( channel->getVelocityField() );
+    double speed_p = 1 / param.tau_a * max_velocity + (param.beta - 1) / (param.beta + 0.5) * param.gravity(1);
+    if ( speed_p > 0 )
+        printf( "Warning: Some particles might not be heavy enough to fall all the way down.\n" );
+
     // Making the Emitter
     Emitter *emitter;
 
