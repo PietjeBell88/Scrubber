@@ -32,6 +32,9 @@ private:
     Vector2d v_vel;
     double count_down;
 
+    // Mass balance parameters
+    double gram_co2;
+
 public:
     /**
      * Default constructor (only needed for creation of ParticleArray).
@@ -92,4 +95,16 @@ public:
      * @param count_down  Time until next eddy.
      */
     void setCountDown( double count_down );
+
+     /**
+     * Get the mass (in gram) of CO2 in this particle.
+     * @return  Amount of gram CO2.
+     */
+    double getGramCO2() const;
+
+    /**
+     * Set the mass (in gram) of CO2 in this particle.
+     * @param gram_co2  Amount of gram CO2.
+     */
+    void setGramCO2( double gram_co2 );
 };

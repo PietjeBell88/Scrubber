@@ -29,6 +29,13 @@ Channel::Channel( const ScrubberParam &param )
     this->height = param.channel.height;
     this->radius = param.channel.radius;
 
+    this->fldensity = param.fl.density;
+
+    this->co2_density = param.co2.density;
+
+    this->conc_b = param.channel.conc_b;
+    this->conc_t = param.channel.conc_t;
+
     this->n = param.channel.n;
     this->dx = param.channel.dx;
 
@@ -176,4 +183,12 @@ void Channel::velocityAt( const Vector2d &pos, const Vector2d &vel, Vector2d *v_
 const ScalarField &Channel::getVelocityField() const
 {
     return u;
+}
+
+double Channel::massFracAt( const Vector2d &pos )
+{
+    const double mass_frac_b = (conc_b * co2_density) / (conc_b * co2_density + (1 - conc_b) * fldensity);
+    const double mass_frac_t = (conc_t * co2_density) / (conc_t * co2_density + (1 - conc_t) * fldensity);
+    double mass_frac = mass_frac_b * (1 - pos(1) / height) + mass_frac_t * pos(1) / height;
+    return mass_frac;
 }

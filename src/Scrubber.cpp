@@ -141,6 +141,9 @@ int main( int argc, char* argv[] )
 
     mover = new Mover( param, channel );
 
+    // Making a struct to keep track of statistics
+    StatsStruct stats;
+
     // Allocating memory for the array that holds the particles
     ParticleArray particles( param.maxparticles );
 
@@ -156,7 +159,7 @@ int main( int argc, char* argv[] )
         writeProgress( (int) (100 * time / param.duration) );
 
         // Move the particles
-        mover->doMove( &particles );
+        mover->doMove( &particles, &stats );
 
         emitter->update( time, &particles );
 
@@ -177,6 +180,33 @@ int main( int argc, char* argv[] )
         }
     }
 
+    printf( "Done after %.5g seconds (%d%%).\n", time, (int) (100 * time / param.duration) );
+
+    int total_out;
+
+    if ( param.channel.bounce_model == BOUNCE_STICK )
+        total_out = stats.p_top + stats.p_bottom + stats.p_wall;
+    else
+        total_out = stats.p_top + stats.p_bottom;
+
+    printf( "In total %d particles left the box:\n", total_out );
+    printf( "  - Top:    %d (%.5g%%)\n", stats.p_top, 100 * (double) stats.p_top / total_out );
+    printf( "  - Bottom: %d (%.5g%%)\n", stats.p_bottom, 100 * (double) stats.p_bottom / total_out );
+    if ( param.channel.bounce_model == BOUNCE_STICK )
+        printf( "  - Wall:   %d (%.5g%%)\n", stats.p_wall, 100 * (double) stats.p_wall / total_out );
+    else
+        printf( "%d times particles bounced off the wall.\n", stats.p_wall );
+
+    // In liters:
+    const double used_mea = param.p.mole_mea_total * param.mea.mole_mass * total_out / param.mea.density;
+    const double used_solvent = param.p.mole_solvent * param.p.mole_mass * total_out / param.p.density;
+
+    printf( "Captured CO2: %.5g gram\n", stats.captured_co2 );
+    printf( "Used MEA: %.5g L\n", used_mea );
+    printf( "Used solvent: %.5g L\n", used_solvent );
+    printf( "CO2 / MEA: %.5g g/L\n", stats.captured_co2 / used_mea );
+    printf( "CO2 / total: %.5g g/L\n", stats.captured_co2 / (used_mea + used_solvent) );
+
     delete output;
     delete mover;
     delete emitter;
@@ -191,7 +221,7 @@ void show_help()
             "General Options:\n"
             "  -h, --help                                  Produce this help message.\n"
             "      --duration <double> (=600.0)            Duration of computation in seconds.\n"
-            "      --dtscale <double> (=0.5)               dt = dtscale * systemtime.\n"
+            "      --dtscale <double> (=0.5)               dt = dtscale * min( tau_p, tau_m ).\n"
             "      --errork <double> (=1E-5)               The error threshold for the steady velocity profile.\n"
             "      --relax <double> (=0.9)                 Relaxation for prandtl mixing length. 0 = none, 0.99 = a lot.\n"
             "      --gravangle <double> (=0.0)             Angle of gravity with the negative z-axis.\n"
@@ -201,6 +231,8 @@ void show_help()
             "Channel Options:\n"
             "      --height <double> (=75.0)               Height of the channel (m).\n"
             "      --radius <double> (=3.0)                Radius of the channel (m).\n"
+            "      --conc_b <double> (=0.05)               Volume fraction of CO2 at the bottom.\n"
+            "      --conc_t <double> (=0.01)               Volume fraction of CO2 at the top.\n"
             "      --n <double> (=800)                     Amount of \"volumes\" in the channel.\n"
             "      --globbc <enum> (=2)                    Global boundary condition:\n"
             "                                                1: Pressure gradient (usually negative).\n"
@@ -233,6 +265,7 @@ void show_help()
             "Particle Options:\n"
             "      --pdensity <double> (=1000.0)           Density of the particles (kg/m3).\n"
             "      --pradius <double> (=3E-4)              Diameter of the particles (m).\n"
+            "      --frac_mea <double> (=0.40)             Mass fraction of MEA.\n"
             "\n"
             "Emitter Options:\n"
             "      --etype <enum> (=1)                     Emitter type:\n"
@@ -292,6 +325,8 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         // Channel Options
     ops >> Option( 'a', "height",  param->channel.height,       75.0 )
         >> Option( 'a', "radius",  param->channel.radius,       3.0 )
+        >> Option( 'a', "conc_b",  param->channel.conc_b,       0.05 )
+        >> Option( 'a', "conc_t",  param->channel.conc_t,       0.01 )
         >> Option( 'a', "n",       param->channel.n,            800 )
         >> Option( 'a', "globbc",  param->channel.globbc,       (int) GBC_BULK_VEL )
         >> Option( 'a', "globbv",  param->channel.globbv,       3.0 )
@@ -307,7 +342,8 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         >> Option( 'a', "flrho", param->fl.density, 1.0 );
         // Particle Options
     ops >> Option( 'a', "pdensity", param->p.density,  1000.0 )
-        >> Option( 'a', "pradius",  param->p.radius,   3E-4 );
+        >> Option( 'a', "pradius",  param->p.radius,   3E-4 )
+        >> Option( 'a', "frac_mea", param->p.mass_frac_mea, 0.40 );
         // Emitter Options
     ops >> Option( 'a', "etype",   param->emitter.type, (int) EMITTER_ONCE )
         >> Option( 'a', "dim",     s_edim,              "[-3:30:3,60:1:60]" )
@@ -329,6 +365,25 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
 
     // Extra fluid stuff
     param->fl.nu = param->fl.mu / param->fl.density;
+
+    // CO2 properties
+    param->co2.mole_mass = 44.01;
+    param->co2.diffusivity = 0.14E-4;
+    param->co2.density = 1.98;
+
+    // MEA properties
+    param->mea.mole_mass = 61.0;
+    param->mea.density = 1E3;
+
+    // Solvent properties
+    param->p.mole_mass = 18.0;
+
+    // Extra/redundant particle stuff
+    param->p.diameter = 2 * param->p.radius;
+    param->p.volume = (4.0 / 3.0) * PI * pow3( param->p.radius );
+    param->p.mass = param->p.density * param->p.volume;
+    param->p.mole_mea_total = param->p.mass_frac_mea * param->p.mass * 1000.0 / param->mea.mole_mass ;
+    param->p.mole_solvent = (1.0 - param->p.mass_frac_mea) * param->p.mass * 1000.0 / param->p.mole_mass;
 
     // Read grid+delimiter+deltas for the emitter.
     readGridDelimiterDelta( s_edim, &param->emitter.grid, &param->emitter.delimiter,
@@ -354,7 +409,11 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
     param->tau_p = param->p.density * 4 * param->p.radius * param->p.radius / (18 * param->fl.nu);
     param->tau_a = (param->beta + 0.5) / param->beta * param->tau_p;
 
-    param->dt = param->dtscale * param->tau_p;
+    param->tau_m = param->p.density * pow2( param->p.diameter ) /
+                   ( 12.0 * param->co2.density * param->co2.diffusivity);
+
+    // Check both the particle acceleration time and the mass transfer time for timestep size
+    param->dt = param->dtscale * min( param->tau_p, param->tau_m );
 
     // Check for possible input
     if ( param->input.path == "" )
@@ -414,6 +473,7 @@ void printParam( const ScrubberParam &param )
 {
     printf( "System Time (tau_p): %.5g\n", param.tau_p );
     printf( "System Time (tau_a): %.5g\n", param.tau_a );
+    printf( "Mass Transfer Time (tau_m): %.5g\n", param.tau_m );
     printf( "Timestep size (dt):  %.5g\n", param.dt );
     printf( "Amount of timesteps: %.5g\n", param.duration / param.dt );
 }

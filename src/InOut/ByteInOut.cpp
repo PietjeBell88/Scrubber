@@ -68,9 +68,10 @@ inline void ByteInOut::writePositions( bool first_call, double time, const Parti
         {
         // Readability
         const Vector2d & pos = particles.getParticle( i ).getPos();
+        const double gram = particles.getParticle( i ).getGramCO2();
 
-        double buf[] = { pos(0), pos(1) };
-        fwrite( buf, 8, 2, f );
+        double buf[] = { pos(0), pos(1), gram };
+        fwrite( buf, 8, 3, f );
     }
 }
 

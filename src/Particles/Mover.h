@@ -22,6 +22,7 @@
 // Forward Declarations
 class ParticleArray;
 class Channel;
+class Particle;
 
 
 /**
@@ -35,7 +36,17 @@ private:
     Vector2d gravity;
     double dt;
     double beta;
+
     double tau_a;
+    double pdiameter;
+    double mole_mea_total;
+    double mole_solvent;
+
+    double co2_mole_mass;
+    double co2_diffusivity;
+    double co2_density;
+
+    double nu;
 
     double c_restitution;
     double c_friction;
@@ -55,6 +66,13 @@ private:
      */
     void bounceWall( const Vector2d &old_pos, Vector2d *new_pos, Vector2d *new_vel );
 
+    /**
+     * Calculates the new amount (in gram) of totally absorbed CO2 in the particle.
+     * @param p  The particle with its properties.
+     * @return   The new total amount of CO2 in the particle.
+     */
+    double newGramCO2( const Particle &p );
+
 public:
     /**
      * Constructor.
@@ -67,7 +85,8 @@ public:
     /**
      * Moves the particles and does checks on them.
      * @param particles  The array of particles which will be checked.
+     * @param stats      Keeps track of statistics.
      * @see              bounceWall()
      */
-    void doMove( ParticleArray *particles );
+    void doMove( ParticleArray *particles, StatsStruct *stats );
 };

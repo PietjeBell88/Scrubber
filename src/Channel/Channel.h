@@ -34,6 +34,13 @@ protected:
     double height;
     double radius;
 
+    double fldensity;
+
+    double co2_density;
+
+    double conc_b;
+    double conc_t;
+
     int n;
     double dx;
 
@@ -102,4 +109,11 @@ public:
      * @return  The vector field.
      */
     const ScalarField &getVelocityField() const;
+
+   /**
+    * Gives the mass fraction of CO2 at a certain position.
+    * @param pos  Position to get the mass fraction at.
+    * @return     The mass fraction of CO2 at pos.
+    */
+    double massFracAt( const Vector2d &pos );
 };

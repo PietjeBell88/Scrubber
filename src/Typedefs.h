@@ -33,6 +33,11 @@ double inline pow2( const double &c )
     return c*c;
 }
 
+double inline pow3( const double &c )
+{
+    return c*c*c;
+}
+
 template <class T> const T& min ( const T& a, const T& b ) {
   return (a<b)?a:b;
 }

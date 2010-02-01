@@ -101,6 +101,7 @@ struct ScrubberParam
 
     double tau_p;     /// System time
     double tau_a;     /// System time compensated for density ratio
+    double tau_m;     /// Particle mass transfer relaxtion time
 
     double errork;    /// Maximum error during calculations
     double relax;     /// Relaxation parameter. 0 = no relaxation, 0.99 = a lot.
@@ -114,6 +115,9 @@ struct ScrubberParam
     {
         double height;         /// Height of the channel (m)
         double radius;         /// Radius of the channel (m)
+
+        double conc_b;         /// Concentration at the bottom of the system.
+        double conc_t;         /// Concentration at the top of the system.
 
         int n;                 /// Amount of volumes at one height in the channel.
         double dx;             /// Stepsizes of the grid
@@ -139,11 +143,35 @@ struct ScrubberParam
         double density;  /// Fluid density (kg/m^3)
     } fl;
 
+    // co2 properties
+    struct co2
+    {
+        double mole_mass;    /// Molecular mass (g/mol)
+        double diffusivity;  /// Diffusion coefficient (m^2/s)
+        double density;      /// Density (kg/m^3)
+    } co2;
+
+    // MEA properties
+    struct mea
+    {
+        double mole_mass;    /// Molecular mass (g/mol)
+        double density;      /// Density (kg/m^3)
+    } mea;
+
     // Global particle properties (the same for all particles)
     struct particle
     {
-        double density;  /// Particle density (kg/m^3)
-        double radius;   /// Particle radius (m)
+        double density;        /// Density (kg/m^3)
+        double radius;         /// Particle radius (m)
+        double mass_frac_mea;  /// Initial mass fraction of MEA in a particle
+        double mole_mass;      /// Molecular mass of the solvent (g/mol)
+
+        // readability / redundant
+        double diameter;       /// Particle diameter (m)
+        double volume;         /// Particle volume (m^3)
+        double mass;           /// Particle mass (kg)
+        double mole_mea_total; /// Total amount of mole MEA (bound + unbound)
+        double mole_solvent;   /// Total mole solvent (usually water)
     } p;
 
     // Emitter properites
@@ -177,6 +205,24 @@ struct ScrubberParam
 
     // Calculated parameters
     double beta;  /// Ratio between fluid and particle density
+};
+
+struct StatsStruct
+{
+    StatsStruct()
+    {
+        this->p_top = 0;
+        this->p_bottom = 0;
+        this->p_wall = 0;
+
+        this->captured_co2 = 0;
+    }
+
+    int p_top;     /// Amount of particles that left at the top
+    int p_bottom;  /// Amount of particles that left at the bottom
+    int p_wall;    /// Amount of times the particles hit the wall / Amount of particles that left at the wall
+
+    double captured_co2;  /// Amount of gram CO2 captured
 };
 
 

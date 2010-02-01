@@ -17,6 +17,8 @@
 #include "Mover.h"
 
 #include "ParticleArray.h"
+#include "Particle.h"
+
 #include "Channel/Channel.h"
 
 
@@ -26,7 +28,17 @@ Mover::Mover( const ScrubberParam &param, Channel *channel )
     this->gravity = param.gravity;
     this->dt = param.dt;
     this->beta = param.beta;
+
     this->tau_a = param.tau_a;
+    this->pdiameter = param.p.diameter;
+    this->mole_mea_total = param.p.mole_mea_total;
+    this->mole_solvent = param.p.mole_solvent;
+
+    this->co2_mole_mass = param.co2.mole_mass;
+    this->co2_diffusivity = param.co2.diffusivity;
+    this->co2_density = param.co2.density;
+
+    this->nu = param.fl.nu;
 
     this->c_restitution = param.channel.c_restitution;
     this->c_friction = param.channel.c_friction;
@@ -68,9 +80,39 @@ void Mover::bounceWall( const Vector2d &old_pos, Vector2d *new_pos, Vector2d *ve
     }
 }
 
+double Mover::newGramCO2( const Particle &p )
+{
+    // Readability
+    const double p_gram_co2 = p.getGramCO2();
+    const double p_mole_co2 = p_gram_co2 / co2_mole_mass;
+    const Vector2d pos = p.getPos();
+    const Vector2d vel = p.getVel();
+
+    // Get the concentration at the heigth of the particle
+    double fl_mass_frac_co2 = channel->massFracAt( pos );
+
+    // Calculate some dimensionless numbers
+    double Re_p = blitz::norm( vel ) * pdiameter / nu ;
+    static double Sc = nu / co2_diffusivity;
+    double Sh = 2.0 + 0.66 * sqrt( Re_p ) * pow( Sc, 1.0 / 3 );
+
+    // Calculating the fraction of free MEA in the particle, and use it as a "correction" factor
+    double correction_factor = ( mole_mea_total - 2.0 * p_mole_co2 ) / ( mole_mea_total + mole_solvent );
+
+    // Break when correction factor is negative, because losing CO2 is endothermic
+    if ( correction_factor <= 0 )
+        return p_gram_co2;
+
+    // Calculating the mass (kg) of CO2 added in a timestep
+    double dm = Sh * PI * pdiameter * co2_density * co2_diffusivity * fl_mass_frac_co2 * dt * correction_factor;
+
+    // Return the new total amount of co2 in the particle in gram
+    return p_gram_co2 + dm * 1000.0;
+}
+
 
 // Public Methods
-void Mover::doMove( ParticleArray *particles )
+void Mover::doMove( ParticleArray *particles, StatsStruct *stats )
 {
     /*
      * See Formula 11 in M.F. Cargnelutti and Portela's "Influence of the resuspension on
@@ -111,13 +153,21 @@ void Mover::doMove( ParticleArray *particles )
         // Check if the particle is outside the channel
         switch ( channel->outsideBox( new_pos ) ) {
             case P_OUTSIDE_TOP:
+                stats->p_top++;
+                // Remove the particle and update co2 stats
+                stats->captured_co2 += particles->remove( p ).getGramCO2();
+                break;
             case P_OUTSIDE_BOTTOM:
-                particles->remove( p );
+                stats->p_bottom++;
+                // Remove the particle and update co2 stats
+                stats->captured_co2 += particles->remove( p ).getGramCO2();
                 break;
             case P_OUTSIDE_SIDE:
+                stats->p_wall++;
                 if ( bounce_model == BOUNCE_STICK )
                 {
-                    particles->remove( p );
+                    // Remove the particle and update co2 stats
+                    stats->captured_co2 += particles->remove( p ).getGramCO2();
                     break;
                 }
                 else
@@ -126,6 +176,8 @@ void Mover::doMove( ParticleArray *particles )
                 // Give the particle his new position.
                 particle.setPos( new_pos );
                 particle.setVel( new_vel );
+
+                particle.setGramCO2( newGramCO2( particle ) );
 
                 // Write the particle back to the array (maybe, and hopefully, it will be written
                 // directly to the array instead of making a temporary object like "particle" is.

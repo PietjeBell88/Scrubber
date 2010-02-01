@@ -55,10 +55,11 @@ inline void TextInOut::writePositions( bool first_call, double time, const Parti
         {
         // Readability
         const Vector2d & pos = particles.getParticle( i ).getPos();
+        const double gram = particles.getParticle( i ).getGramCO2();
 
         // Write output to file
-        fprintf( f, "%e     %e     %e\n",
-                 time, pos(0), pos(1) );
+        fprintf( f, "%e     %e     %e     %e\n",
+                 time, pos(0), pos(1), gram );
     }
     fprintf( f, "\n" );
 }

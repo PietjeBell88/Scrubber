@@ -24,6 +24,7 @@ Particle::Particle()
     this->vel = Vector2d( 0, 0 );
     this->v_vel = Vector2d( 0, 0 );
     this->count_down = 0;
+    this->gram_co2 = 0;
 }
 
 Particle::Particle( const Vector2d &pos, const Vector2d &vel )
@@ -32,6 +33,7 @@ Particle::Particle( const Vector2d &pos, const Vector2d &vel )
     this->vel = vel;
     this->v_vel = Vector2d( 0, 0 );
     this->count_down = 0;
+    this->gram_co2 = 0;
 }
 
 
@@ -74,4 +76,14 @@ double Particle::getCountDown() const
 void Particle::setCountDown( double count_down )
 {
     this->count_down = count_down;
+}
+
+double Particle::getGramCO2() const
+{
+    return gram_co2;
+}
+
+void Particle::setGramCO2( double gram_co2 )
+{
+    this->gram_co2 = gram_co2;
 }
