@@ -68,7 +68,7 @@ double Channel::interpolate2d( const Vector2d &pos )
      * Note: 0 <= x < 1
      * Modulo needs to be done on positive values.
      */
-    double x = fmod(pos(0) + radius + 0.5 * dx, dx) / dx;
+    double x = fmod( pos(0) + radius + 0.5 * dx, dx ) / dx;
 
     //Do a weighted addition
     return u(i) * (1 - x) + u(i + 1) * x;

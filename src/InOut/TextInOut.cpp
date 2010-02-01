@@ -24,7 +24,7 @@
 TextInOut::TextInOut( const ScrubberParam &param ) :
                           InOut( param )
 {
-    if ( param.output.info != OUTPUT_NOTHING )
+    if ( outputinfo != OUTPUT_NOTHING )
     {
         f = fopen( param.output.path.c_str(), "w" );
 
@@ -40,7 +40,7 @@ TextInOut::TextInOut( const ScrubberParam &param ) :
 
 TextInOut::~TextInOut()
 {
-    if ( param.output.info != OUTPUT_NOTHING )
+    if ( outputinfo != OUTPUT_NOTHING )
         fclose(f);
 }
 
@@ -80,7 +80,7 @@ void TextInOut::readProfile( ScrubberParam *param, ScalarField *u )
 {
     FILE *f = fopen( param->input.path.c_str(), "r" );
     // Skip the file type header
-    fseek ( f , 4 , SEEK_SET );
+    fseek( f, 4, SEEK_SET );
 
     // Shut up warnings
     int nread;

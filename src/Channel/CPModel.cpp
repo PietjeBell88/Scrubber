@@ -136,7 +136,8 @@ ScalarField CPModel::loopPrandtl( ScalarField u )
 }
 
 ScalarField CPModel::loopVanDriest( ScalarField u )
-{ScalarField unew( u.shape() );
+{
+    ScalarField unew( u.shape() );
     unew = 0;
 
     double error = 10000;

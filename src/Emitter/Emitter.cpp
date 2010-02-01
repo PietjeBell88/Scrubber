@@ -24,8 +24,6 @@
 Emitter::Emitter( const ScrubberParam &param, Channel *channel )
 {
     // Save the variables (readability)
-    this->p_density = param.p.density;
-    this->p_diameter = param.p.radius * 2;
     this->init_velocity = param.emitter.init_velocity;
 
     this->grid = param.emitter.grid;

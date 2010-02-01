@@ -31,8 +31,6 @@ InOut::InOut( const ScrubberParam &param )
     this->radius = param.channel.radius;
     this->dx = param.channel.dx;
     this->n = param.channel.n;
-
-    this->param = param; // only needed for outputting cmdline options
 }
 
 InOut::~InOut() {}

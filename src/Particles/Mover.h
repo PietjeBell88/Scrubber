@@ -56,7 +56,6 @@ private:
     BounceModel bounce_model;
 
     Channel *channel;
-    Emitter *emitter;
 
     /**
      * Bounces particles off the wall based on different models. Changes position and velocity.

@@ -49,7 +49,6 @@ Mover::Mover( const ScrubberParam &param, Channel *channel )
     this->bounce_model = (BounceModel) param.channel.bounce_model;
 
     this->channel = channel;
-    this->emitter = emitter;
 }
 
 

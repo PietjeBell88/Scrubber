@@ -24,7 +24,7 @@
 ByteInOut::ByteInOut( const ScrubberParam &param ) :
                           InOut( param )
 {
-    if ( param.output.info != OUTPUT_NOTHING )
+    if ( outputinfo != OUTPUT_NOTHING )
     {
         f = fopen( param.output.path.c_str(), "wb" );
 
@@ -40,7 +40,7 @@ ByteInOut::ByteInOut( const ScrubberParam &param ) :
 
 ByteInOut::~ByteInOut()
 {
-    if ( param.output.info != OUTPUT_NOTHING )
+    if ( outputinfo != OUTPUT_NOTHING )
         fclose( f );
 }
 
@@ -98,7 +98,7 @@ void ByteInOut::readProfile( ScrubberParam *param, ScalarField *u )
 {
     FILE *f = fopen( param->input.path.c_str(), "rb" );
     // Skip the file type header
-    fseek ( f , 4 , SEEK_SET );
+    fseek( f, 4, SEEK_SET );
 
     // Shut up warnings
     int nread;

@@ -41,9 +41,6 @@ protected:
 
     FILE *f;
 
-    ScrubberParam param;   // To output the cmdline options to file when wanted.
-
-
     /**
      * Write the positions and concentration of particles to the file.
      * @param first_call  True if this function is first called.

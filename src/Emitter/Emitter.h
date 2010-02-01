@@ -36,13 +36,9 @@ using std::string;
 class Emitter
 {
 protected:
-    // Particle properties (readability)
-    double p_density;
-    double p_diameter;
-
     TGrid grid;
     TDelimiter delimiter;
-    double dx, dy, dz;
+    double dx, dy;
 
     int p_N;
     double p_rate;

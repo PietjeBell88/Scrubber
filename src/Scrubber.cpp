@@ -44,7 +44,7 @@ using std::cout;
 inline void writeProgress( int perc )
 {
     printf( "[%d%%]\r", perc );
-    fflush( stdout);
+    fflush( stdout );
 }
 
 int main( int argc, char* argv[] )
@@ -475,5 +475,5 @@ void printParam( const ScrubberParam &param )
     printf( "System Time (tau_a): %.5g\n", param.tau_a );
     printf( "Mass Transfer Time (tau_m): %.5g\n", param.tau_m );
     printf( "Timestep size (dt):  %.5g\n", param.dt );
-    printf( "Amount of timesteps: %.5g\n", param.duration / param.dt );
+    printf( "Amount of timesteps: %.5g\n\n", param.duration / param.dt );
 }
