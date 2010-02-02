@@ -165,6 +165,7 @@ struct ScrubberParam
         double radius;         /// Particle radius (m)
         double mass_frac_mea;  /// Initial mass fraction of MEA in a particle
         double mole_mass;      /// Molecular mass of the solvent (g/mol)
+        double clustersize;    /// Particle cluster size.
 
         // readability / redundant
         double diameter;       /// Particle diameter (m)

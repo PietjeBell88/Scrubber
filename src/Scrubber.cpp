@@ -189,7 +189,7 @@ int main( int argc, char* argv[] )
     else
         total_out = stats.p_top + stats.p_bottom;
 
-    printf( "In total %d particles left the box:\n", total_out );
+    printf( "In total %d (* %.5g) particles left the box:\n", total_out, param.p.clustersize );
     printf( "  - Top:    %d (%.5g%%)\n", stats.p_top, 100 * (double) stats.p_top / total_out );
     printf( "  - Bottom: %d (%.5g%%)\n", stats.p_bottom, 100 * (double) stats.p_bottom / total_out );
     if ( param.channel.bounce_model == BOUNCE_STICK )
@@ -198,8 +198,11 @@ int main( int argc, char* argv[] )
         printf( "%d times particles bounced off the wall.\n", stats.p_wall );
 
     // In liters:
-    const double used_mea = param.p.mole_mea_total * param.mea.mole_mass * total_out / param.mea.density;
-    const double used_solvent = param.p.mole_solvent * param.p.mole_mass * total_out / param.p.density;
+    const double used_mea = param.p.clustersize * param.p.mole_mea_total * param.mea.mole_mass * total_out / param.mea.density;
+    const double used_solvent = param.p.clustersize * param.p.mole_solvent * param.p.mole_mass * total_out / param.p.density;
+
+    // Multiply the captured co2 by the clustersize
+    stats.captured_co2 = param.p.clustersize * stats.captured_co2;
 
     printf( "Captured CO2: %.5g gram\n", stats.captured_co2 );
     printf( "Used MEA: %.5g L\n", used_mea );
@@ -266,6 +269,7 @@ void show_help()
             "      --pdensity <double> (=1000.0)           Density of the particles (kg/m3).\n"
             "      --pradius <double> (=3E-4)              Diameter of the particles (m).\n"
             "      --frac_mea <double> (=0.40)             Mass fraction of MEA.\n"
+            "      --cluster <double> (=1.0)               Particle cluster size.\n"
             "\n"
             "Emitter Options:\n"
             "      --etype <enum> (=1)                     Emitter type:\n"
@@ -343,7 +347,8 @@ void parse( int argc, char* argv[], ScrubberParam *param ) {
         // Particle Options
     ops >> Option( 'a', "pdensity", param->p.density,  1000.0 )
         >> Option( 'a', "pradius",  param->p.radius,   3E-4 )
-        >> Option( 'a', "frac_mea", param->p.mass_frac_mea, 0.40 );
+        >> Option( 'a', "frac_mea", param->p.mass_frac_mea, 0.40 )
+        >> Option( 'a', "cluster",  param->p.clustersize, 1.0 );
         // Emitter Options
     ops >> Option( 'a', "etype",   param->emitter.type, (int) EMITTER_ONCE )
         >> Option( 'a', "dim",     s_edim,              "[-3:30:3,60:1:60]" )
