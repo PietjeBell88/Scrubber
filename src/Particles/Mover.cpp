@@ -21,6 +21,10 @@
 
 #include "Channel/Channel.h"
 
+#include <vector>
+#include <algorithm>
+#include <utility>
+
 
 // Constructor / Destructor
 Mover::Mover( const ScrubberParam &param, Channel *channel )
@@ -117,6 +121,10 @@ void Mover::doMove( ParticleArray *particles, StatsStruct *stats )
      * See Formula 11 in M.F. Cargnelutti and Portela's "Influence of the resuspension on
      * the particle sedimentation in wall-bounded turbulent flows") for the equation of motion.
      */
+    std::vector< std::pair<int,PosBox> > markedParticles;
+    markedParticles.reserve(8000);
+
+#pragma omp parallel for
     for ( int p = 0; p < particles->getLength(); p++ )
     {
         // Get the particle.
@@ -149,39 +157,61 @@ void Mover::doMove( ParticleArray *particles, StatsStruct *stats )
         Vector2d new_vel = p_vel + dv;
         Vector2d new_pos = p_pos + new_vel * dt;
 
-        // Check if the particle is outside the channel
-        switch ( channel->outsideBox( new_pos ) ) {
+        PosBox pos_box = channel->outsideBox( new_pos );
+
+        if ( bounce_model != BOUNCE_STICK && pos_box != P_INSIDE )
+        {
+            bounceWall( p_pos, &new_pos, &new_vel );
+            pos_box = channel->outsideBox( new_pos );
+        }
+
+        if ( pos_box == P_INSIDE )
+        {
+            // Give the particle his new position.
+            particle.setPos( new_pos );
+            particle.setVel( new_vel );
+
+            particle.setGramCO2( newGramCO2( particle ) );
+
+            particles->setParticle( p, particle );
+        }
+        else
+        {
+            // Mark the particle
+            #pragma omp critical
+            markedParticles.push_back( std::pair<int,PosBox>( p, pos_box ) );
+        }
+    }
+
+    // Sort the marked particles in descending order
+    std::sort( markedParticles.begin(), markedParticles.end() );
+
+    std::vector< std::pair<int,PosBox> >::reverse_iterator rii;
+
+    // Loop in reverse order (remove high-numbered particles first)
+    for( rii = markedParticles.rbegin(); rii != markedParticles.rend(); ++rii )
+    {
+        const int p = (*rii).first;
+        const PosBox pos_box = (*rii).second;
+
+        Particle particle = particles->getParticle( p );
+
+        // Get the particles CO2
+        stats->captured_co2 += particle.getGramCO2();
+
+        // Update the stats
+        switch ( pos_box ) {
             case P_OUTSIDE_TOP:
                 stats->p_top++;
-                // Remove the particle and update co2 stats
-                stats->captured_co2 += particles->remove( p ).getGramCO2();
                 break;
             case P_OUTSIDE_BOTTOM:
                 stats->p_bottom++;
-                // Remove the particle and update co2 stats
-                stats->captured_co2 += particles->remove( p ).getGramCO2();
                 break;
             case P_OUTSIDE_SIDE:
                 stats->p_wall++;
-                if ( bounce_model == BOUNCE_STICK )
-                {
-                    // Remove the particle and update co2 stats
-                    stats->captured_co2 += particles->remove( p ).getGramCO2();
-                    break;
-                }
-                else
-                    bounceWall( p_pos, &new_pos, &new_vel );
-            case P_INSIDE:
-                // Give the particle his new position.
-                particle.setPos( new_pos );
-                particle.setVel( new_vel );
-
-                particle.setGramCO2( newGramCO2( particle ) );
-
-                // Write the particle back to the array (maybe, and hopefully, it will be written
-                // directly to the array instead of making a temporary object like "particle" is.
-                particles->setParticle( p, particle );
                 break;
         }
+        // Remove the particle
+        particles->remove( p );
     }
 }
